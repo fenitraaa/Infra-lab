@@ -1,0 +1,4 @@
+*.log
+*.deb
+box:
+.vagrant
