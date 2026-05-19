@@ -2,3 +2,5 @@
 *.deb
 box:
 .vagrant
+*.vmdk
+*lck
