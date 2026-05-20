@@ -1,0 +1,30 @@
+- name: Install slapd
+  apt:
+    name: slapd
+    state: present
+    update_cache: yes
+
+- name: Configure LDAP answers
+  ansible.builtin.debconf:
+    name: slapd
+    question: "{{ item.question }}"
+    value: "{{ item.value }}"
+    vtype: "{{ item.vtype }}"
+  loop:
+    - { question: 'slapd/domain', value: '{{ ldap_domain }}', vtype: 'string' }
+    - { question: 'slapd/organization', value: '{{ ldap_org }}', vtype: 'string' }
+    - { question: 'slapd/password1', value: '{{ ldap_admin_password }}', vtype: 'password' }
+    - { question: 'slapd/password2', value: '{{ ldap_admin_password }}', vtype: 'password' }
+
+- name: Install OpenLDAP
+  ansible.builtin.apt:
+    name:
+      - slapd
+      - ldap-utils
+    state: present
+
+- name: Ensure slapd is running
+  ansible.builtin.service:
+    name: slapd
+    state: started
+    enabled: true

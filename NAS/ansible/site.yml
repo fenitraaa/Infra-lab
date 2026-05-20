@@ -1,0 +1,5 @@
+- name: Install Openldap
+  hosts: ldap
+  become: true
+  roles:
+    - openldap
