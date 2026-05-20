@@ -1,6 +1,6 @@
-## NETWORK ATTACHED STORAGE (NAS)
+# NETWORK ATTACHED STORAGE (NAS)
 
-# Vagrant Configuration
+## Vagrant Configuration
 Create all 3 disks vmdk
 ```sh
 for i in {1..3}; do
@@ -12,7 +12,7 @@ Launch all VMs
 ```
 vagrant up
 ```
-# Ansible Configuration
+## Ansible Configuration
 Create ansible/group_vars/vault.yml
 ```
 ldap_admin_password: your password
