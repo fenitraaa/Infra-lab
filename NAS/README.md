@@ -12,6 +12,21 @@ Launch all VMs
 ```
 vagrant up
 ```
+So you have 3 VMs in VMware Player:
+
+![VMware](screenshot/VMware-VMs.png)
+
+
+You can access all VMs using ssh
+```
+vagrant ssh ldap
+vagrant ssh nas
+vagrant ssh backup
+```
+Verify if all disk are recognized by nas server
+
+![lsblk](screenshot/NAS-lsblk.png)
+
 ## Ansible Configuration
 Create ansible/group_vars/vault.yml
 ```

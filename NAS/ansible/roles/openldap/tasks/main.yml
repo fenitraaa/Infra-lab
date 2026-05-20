@@ -15,7 +15,7 @@
     - { question: 'slapd/organization', value: '{{ ldap_org }}', vtype: 'string' }
     - { question: 'slapd/password1', value: '{{ ldap_admin_password }}', vtype: 'password' }
     - { question: 'slapd/password2', value: '{{ ldap_admin_password }}', vtype: 'password' }
-
+  no_log: true
 - name: Install OpenLDAP
   ansible.builtin.apt:
     name:
