@@ -1,5 +1,8 @@
 # NETWORK ATTACHED STORAGE (NAS)
 
+## Network Topology
+![Architecture](screenshot/Network%20Diagram.png)
+
 ## Vagrant Configuration
 Create all 3 disks vmdk
 ```sh

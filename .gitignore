@@ -4,3 +4,4 @@ box:
 .vagrant
 *.vmdk
 *lck
+NAS/ansible/group_vars/ldap/vault.yml
