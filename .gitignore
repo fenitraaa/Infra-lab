@@ -5,3 +5,7 @@ box:
 *.vmdk
 *lck
 NAS/ansible/group_vars/ldap/vault.yml
+RIPv2-and-OSPF/project-files/**/*.txt
+*c7200_i[1-9]_*
+*ghost
+ilt_2023010200_*
