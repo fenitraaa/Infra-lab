@@ -14,7 +14,7 @@ This project presents the steps for implementing and analyzing the RIPv2 and OSP
 
 ### 1. Topology
 
-The network topology was built according to the project specifications, with 6 routers (R1 to R6) interconnected using the [Cisco c7200](https://github.com/fenitraaa/Infra-lab/raw/main/RIPv2-and-OSPF/c7200.bin) model.
+The network topology was built according to the project specifications, with 6 routers (R1 to R6) interconnected using the [Cisco c7200](https://github.com/fenitraaa/Infra-lab/raw/main/RIPv2-and-OSPF/c7200-adventerprisek9-mz.152-4.M7.bin) model.
 
 ![RIPv2 topology in GNS3](images/init-rip-Capture%20d’écran%20du%202025-05-10%2020-23-18.png)
 
