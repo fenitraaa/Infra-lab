@@ -1,0 +1,27 @@
+[ req ]
+default_bits       = 4096
+prompt             = no
+default_md         = sha256
+distinguished_name = dn
+x509_extensions    = v3_ca
+
+[ dn ]
+C  = {{ cert_country }}
+O  = {{ cert_org }}
+CN = {{ cert_common_name }}
+
+[ v3_ca ]
+subjectKeyIdentifier   = hash
+authorityKeyIdentifier = keyid:always,issuer
+basicConstraints       = critical, CA:true
+keyUsage               = critical, digitalSignature, cRLSign, keyCertSign
+
+[ v3_req ]
+keyUsage         = keyEncipherment, dataEncipherment
+extendedKeyUsage = serverAuth
+subjectAltName   = @alt_names
+
+[ alt_names ]
+DNS.1 = {{ cert_common_name }}
+DNS.2 = ldap.local
+IP.1  = {{ ansible_host }}

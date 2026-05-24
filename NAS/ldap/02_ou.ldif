@@ -1,0 +1,15 @@
+dn: ou=people,dc=lab,dc=local
+objectClass: top
+objectClass: organizationalUnit
+ou: people
+description: user account
+
+dn: ou=shares,dc=lab,dc=local
+objectClass: top
+objectClass: organizationalUnit
+ou: shares
+
+dn: ou=group,dc=lab,dc=local
+objectClass: top
+objectClass: organizationalUnit
+ou: group

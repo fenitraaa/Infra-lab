@@ -1,5 +1,26 @@
-- name: Install Openldap
+- name: Install Openldap and generate certificates
   hosts: ldap
   become: true
   roles:
     - openldap
+
+- name: Distribute CA certificate to NAS and clients
+  hosts: nas
+  become: true
+  roles:
+    - nas_ca_dist
+
+- name: Distribute CA certificate to local host
+  hosts: localhost
+  connection: local
+  become: true
+  tasks:
+    - name: Copy CA certificate to local trust store
+      ansible.builtin.copy:
+        content: "{{ hostvars['ldap.local']['ca_cert_data'] }}"
+        dest: /usr/local/share/ca-certificates/ldap-ca.crt
+        mode: "0644"
+
+    - name: Update local CA trust store
+      ansible.builtin.command: update-ca-certificates
+      changed_when: true

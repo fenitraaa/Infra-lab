@@ -1,0 +1,17 @@
+dn: cn=windows,ou=group,dc=lab,dc=local
+objectClass: top
+objectClass: groupOfNames
+cn: windows
+member: uid=placeholder,ou=people,dc=lab,dc=local
+
+dn: cn=admins,ou=group,dc=lab,dc=local
+objectClass: top
+objectClass: groupOfNames
+cn: admins
+member: uid=placeholder,ou=people,dc=lab,dc=local
+
+dn: cn=linux,ou=group,dc=lab,dc=local
+objectClass: top
+objectClass: groupOfNames
+cn: linux
+member: uid=placeholder,ou=people,dc=lab,dc=local

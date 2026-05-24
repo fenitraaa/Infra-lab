@@ -30,17 +30,27 @@ Verify if all disk are recognized by nas server
 
 ![lsblk](screenshot/NAS-lsblk.png)
 
-## Ansible Configuration
-Create ansible/group_vars/vault.yml
+## LDAP Configuration
+Directory Information Tree (DIT)
+![DIT](screenshot/DIT.png)
+
+Create ansible/group_vars/ldap/vault.yml
 ```
 ldap_admin_password: your password
 ```
 and encrypt it:
 ```
-ansible-vault encrypt group_vars/vault.yml
+ansible-vault encrypt group_vars/ldap/vault.yml
 ```
+Execute the scipt to automate ldif configurations
+``` 
+cd /vagrant/ldap
+chmod +x ./ldapadd_script.sh
+./ldapadd_script.sh
+```
+![](screenshot/ldapadd_script.png)
 launch ansible-playbook
 ```
-ansible-playbook site.yml --ask-vault-pass
+ansible-playbook site.yml --ask-vault-pass --ask-become-pass
 ```
-![ansible-playbook command](screenshot/ansible-pass.png)
+![ansible-playbook command](screenshot/ansible-ldap.png)

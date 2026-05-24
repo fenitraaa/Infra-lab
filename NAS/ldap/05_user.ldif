@@ -1,0 +1,45 @@
+dn: uid=linuxuser,ou=people,dc=lab,dc=local
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: linuxuser
+cn: Linux User
+sn: User
+givenName: Linux
+mail: linuxuser@lab.local
+userPassword: {SSHA}0G8ZNP7oCey4SVDTlBD0Y3F8jN/gaDK9
+uidNumber: 10001
+gidNumber: 10001
+homeDirectory: /home/linuxuser
+loginShell: /bin/bash
+gecos: Linux User
+shadowLastChange: 0
+shadowMin: 0
+shadowMax: 99999
+shadowWarning: 7
+
+dn: uid=windowsuser,ou=people,dc=lab,dc=local
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: posixAccount
+objectClass: shadowAccount
+uid: windowsuser
+cn: Windows User
+sn: User
+givenName: Windows
+mail: windowsuser@lab.local
+userPassword: {SSHA}jfMnhJOLwYb6SUzU7QaGCZ/DcnLBWo6g
+uidNumber: 10002
+gidNumber: 10002
+homeDirectory: /nonexistent
+loginShell: /sbin/nologin
+gecos: Windows User
+shadowLastChange: 0
+shadowMin: 0
+shadowMax: 90
+shadowWarning: 14

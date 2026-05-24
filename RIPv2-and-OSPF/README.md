@@ -229,6 +229,8 @@ To fix the problem, the metric must be specified when redistributing OSPF at the
 
 After complete redistribution, all routers across both domains can communicate.
 
+Example: ping from R9 to the Ethernet1/1 interface of R6
+
 ![Final ping test R9 to R6](images/R9-ping-Capture%20d’écran%20du%202025-05-30%2000-01-36.png)
 
 ---

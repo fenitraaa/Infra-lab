@@ -1,0 +1,39 @@
+dn: cn=admins,ou=group,dc=lab,dc=local
+changetype: modify
+add: member
+member: uid=linuxuser,ou=people,dc=lab,dc=local
+
+dn: cn=linux,ou=group,dc=lab,dc=local
+changetype: modify
+add: member
+member: uid=linuxuser,ou=people,dc=lab,dc=local
+
+dn: cn=public,ou=shares,dc=lab,dc=local
+changetype: modify
+add: member
+member: uid=linuxuser,ou=people,dc=lab,dc=local
+
+dn: cn=windows,ou=group,dc=lab,dc=local
+changetype: modify
+add: member
+member: uid=windowsuser,ou=people,dc=lab,dc=local
+
+dn: cn=public,ou=shares,dc=lab,dc=local
+changetype: modify
+add: member
+member: uid=windowsuser,ou=people,dc=lab,dc=local
+
+dn: cn=windows,ou=group,dc=lab,dc=local
+changetype: modify
+delete: member
+member: uid=placeholder,ou=people,dc=lab,dc=local
+
+dn: cn=admins,ou=group,dc=lab,dc=local
+changetype: modify
+delete: member
+member: uid=placeholder,ou=people,dc=lab,dc=local
+
+dn: cn=linux,ou=group,dc=lab,dc=local
+changetype: modify
+delete: member
+member: uid=placeholder,ou=people,dc=lab,dc=local

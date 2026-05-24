@@ -1,0 +1,12 @@
+dn: cn=secure,ou=shares,dc=lab,dc=local
+objectClass: top
+objectClass: groupOfNames
+cn: secure
+member: cn=admins,ou=group,dc=lab,dc=local
+
+dn: cn=public,ou=shares,dc=lab,dc=local
+objectClass: top
+objectClass: groupOfNames
+cn: public
+member: cn=linux,ou=group,dc=lab,dc=local
+member: cn=windows,ou=group,dc=lab,dc=local
