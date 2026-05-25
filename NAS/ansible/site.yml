@@ -1,19 +1,27 @@
 - name: Install Openldap and generate certificates
   hosts: ldap
   become: true
+  tags: openldap
+  gather_facts: false
   roles:
-    - openldap
+    - role: openldap
+      tags: openldap
 
 - name: Distribute CA certificate to NAS and clients
   hosts: nas
   become: true
+  tags: nas_ca_dist
+  gather_facts: false
   roles:
-    - nas_ca_dist
+    - role: nas_ca_dist
+      tags: nas_ca_dist
 
 - name: Distribute CA certificate to local host
   hosts: localhost
   connection: local
   become: true
+  tags: ca_localhost
+  gather_facts: false
   tasks:
     - name: Copy CA certificate to local trust store
       ansible.builtin.copy:
@@ -24,3 +32,12 @@
     - name: Update local CA trust store
       ansible.builtin.command: update-ca-certificates
       changed_when: true
+
+- name: Configure NAS samba
+  hosts: nas
+  become: true
+  tags: nas_samba
+  gather_facts: false
+  roles:
+    - role: nas_samba
+      tags: nas_samba

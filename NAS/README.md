@@ -31,7 +31,9 @@ Verify if all disk are recognized by nas server
 ![lsblk](screenshot/NAS-lsblk.png)
 
 ## LDAP Configuration
+
 Directory Information Tree (DIT)
+
 ![DIT](screenshot/DIT.png)
 
 Create ansible/group_vars/ldap/vault.yml

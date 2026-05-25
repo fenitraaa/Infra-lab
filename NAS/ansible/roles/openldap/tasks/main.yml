@@ -67,7 +67,7 @@
     csr_path: /tmp/ca.csr
     provider: selfsigned
     selfsigned_not_after: "+{{ cert_days }}d"
-    
+
 - name: Generate LDAP server private key
   community.crypto.openssl_privatekey:
     path: "{{ ldap_key_path }}"
@@ -99,6 +99,27 @@
     ownca_path: "{{ ldap_ca_cert_path }}"
     ownca_privatekey_path: "{{ ldap_ca_key_path }}"
     ownca_not_after: "+{{ cert_days }}d"
+
+- name: Set correct ownership on SSL files
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    owner: openldap
+    group: openldap
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: "{{ ldap_ca_cert_path }}", mode: "0644" }
+    - { path: "{{ ldap_cert_path }}",    mode: "0644" }
+    - { path: "{{ ldap_key_path }}",     mode: "0640" }
+
+- name: Configure TLS in slapd
+  community.general.ldap_attrs:
+    dn: cn=config
+    attributes:
+      olcTLSCACertificateFile: "{{ ldap_ca_cert_path }}"
+      olcTLSCertificateFile:    "{{ ldap_cert_path }}"
+      olcTLSCertificateKeyFile: "{{ ldap_key_path }}"
+    state: exact
+  notify: Restart slapd
 
 - name: Read CA certificate for distribution
   ansible.builtin.slurp:

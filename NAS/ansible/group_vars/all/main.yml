@@ -1,4 +1,7 @@
 nas_ca_trust_dir: /usr/local/share/ca-certificates
 
 ldap_uri: ldaps://192.168.10.20:636
-ldap_base_dn: dc=eni,dc=local
+ldap_base_dn: dc=lab,dc=local
+
+ldap_server_ip: "{{ hostvars['ldap.local']['ansible_host'] }}"
+ldap_ca_cert_path: /etc/ssl/CA/ca.crt

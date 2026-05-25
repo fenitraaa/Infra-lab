@@ -1,3 +1,10 @@
+- name: Fetch CA certificate from LDAP
+  ansible.builtin.fetch:
+    src: "{{ ldap_ca_cert_path }}"
+    dest: /tmp/ldap-ca.crt
+    flat: yes
+  delegate_to: ldap.local
+
 - name: Create CA trust directory
   ansible.builtin.file:
     path: "{{ nas_ca_trust_dir }}"
@@ -8,13 +15,9 @@
 
 - name: Distribute CA certificate
   ansible.builtin.copy:
-    content: "{{ hostvars['ldap.local']['ca_cert_data'] }}"
+    src: /tmp/ldap-ca.crt
     dest: "{{ nas_ca_trust_dir }}/ldap-ca.crt"
     owner: root
     group: root
     mode: "0644"
-
-- name: Update CA trust store
-  ansible.builtin.command: update-ca-certificates
-  when: ansible_os_family == "Debian"
-  changed_when: true
+  notify: Update CA trust store

@@ -1,0 +1,4 @@
+- name: Restart Samba
+  ansible.builtin.service:
+    name: smbd
+    state: restarted

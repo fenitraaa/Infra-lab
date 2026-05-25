@@ -1,0 +1,38 @@
+- name: Install Samba and LDAP client
+  ansible.builtin.apt:
+    name:
+      - samba
+      - smbldap-tools
+      - libpam-ldapd
+    state: present
+    update_cache: yes
+
+- name: Deploy smb.conf
+  ansible.builtin.template:
+    src: smb.conf.j2
+    dest: /etc/samba/smb.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart Samba
+
+- name: Create share directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode }}"
+  loop:
+    - { path: /srv/shares/public, mode: "2775" }
+    - { path: /srv/shares/secure, mode: "2770" }
+
+- name: Set Samba LDAP admin password
+  ansible.builtin.command:
+    cmd: smbpasswd -w {{ ldap_admin_password }}
+  no_log: false
+  changed_when: true
+
+- name: Ensure Samba is started and enabled
+  ansible.builtin.service:
+    name: smbd
+    state: started
+    enabled: true

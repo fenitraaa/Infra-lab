@@ -1,12 +1,12 @@
-ldap_domain: eni.local
-ldap_org: ENI
+ldap_domain: lab.local
+ldap_org: lab
 
 cert_dir: /etc/ssl/certs
 key_dir: /etc/ssl/private
 ca_dir: /etc/ssl/CA
 
-cert_common_name: "ldap.eni.local"
-cert_org: "ENI"
+cert_common_name: "ldap.lab.local"
+cert_org: "Lab"
 cert_country: "MG"
 cert_days: 3650
 
