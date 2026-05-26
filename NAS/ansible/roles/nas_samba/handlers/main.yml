@@ -4,6 +4,7 @@
     state: restarted
 
 - name: Restart SSSD
-  ansible.builtin.service:
-    name: sssd
-    state: restarted
+  ansible.builtin.shell: |
+    sss_cache -E
+    systemctl restart sssd
+  changed_when: false

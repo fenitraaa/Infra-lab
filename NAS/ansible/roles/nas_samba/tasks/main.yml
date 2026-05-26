@@ -1,14 +1,22 @@
-- name: Install Samba and SSSD
+- name: Install Samba, SSSD and ACL
   ansible.builtin.apt:
     name:
       - samba
       - sssd
       - sssd-ldap
+      - sssd-tools
       - libpam-sss
       - libnss-sss
-      - python3-ldap
+      - acl
     state: present
     update_cache: yes
+
+- name: Disable NSCD
+  ansible.builtin.service:
+    name: nscd
+    state: stopped
+    enabled: false
+  ignore_errors: true
 
 - name: Deploy smb.conf
   ansible.builtin.template:
@@ -32,10 +40,24 @@
   ansible.builtin.file:
     path: "{{ item.path }}"
     state: directory
+    owner: root
+    group: "{{ item.group }}"
     mode: "{{ item.mode }}"
   loop:
-    - { path: /srv/shares/public, mode: "2775" }
-    - { path: /srv/shares/secure, mode: "2770" }
+    - { path: /srv/shares/public, group: linux,  mode: "2775" }
+    - { path: /srv/shares/secure, group: admins, mode: "2770" }
+
+- name: Add users to Samba tdbsam
+  ansible.builtin.shell: |
+    if ! pdbedit -L | grep -q "^{{ item.user }}:"; then
+      printf '%s\n%s\n' '{{ item.password }}' '{{ item.password }}' | smbpasswd -a -s {{ item.user }}
+    fi
+    smbpasswd -e {{ item.user }}
+  loop:
+    - { user: linuxuser,   password: "{{ vault_linuxuser_password }}" }
+    - { user: windowsuser, password: "{{ vault_windowsuser_password }}" }
+  no_log: true
+  changed_when: false
 
 - name: Ensure SSSD is started and enabled
   ansible.builtin.service:
@@ -49,20 +71,25 @@
     state: started
     enabled: true
 
-- name: Add users to Samba tdbsam
-  ansible.builtin.shell: |
-    if ! pdbedit -L | grep -q "^{{ item.user }}:"; then
-      printf '%s\n%s\n' '{{ item.password }}' '{{ item.password }}' | smbpasswd -a -s {{ item.user }}
-    fi
+- name: Set ACL on public share
+  ansible.posix.acl:
+    path: /srv/shares/public
+    entity: "{{ item }}"
+    etype: group
+    permissions: rwx
+    state: present
   loop:
-    - { user: linuxuser,   password: "{{ vault_linuxuser_password }}" }
-    - { user: windowsuser, password: "{{ vault_windowsuser_password }}" }
-  no_log: true
-  changed_when: false
+    - linux
+    - windows
 
-- name: Enable Samba users
-  ansible.builtin.shell: smbpasswd -e {{ item }}
+- name: Set default ACL on public share
+  ansible.posix.acl:
+    path: /srv/shares/public
+    entity: "{{ item }}"
+    etype: group
+    permissions: rwx
+    default: yes
+    state: present
   loop:
-    - linuxuser
-    - windowsuser
-  changed_when: false
+    - linux
+    - windows

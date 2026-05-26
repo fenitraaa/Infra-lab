@@ -9,3 +9,4 @@ RIPv2-and-OSPF/project-files/**/*.txt
 *c7200_i[1-9]_*
 *ghost
 ilt_2023010200_*
+.vscode

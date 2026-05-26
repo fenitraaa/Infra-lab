@@ -35,7 +35,7 @@ givenName: Windows
 mail: windowsuser@lab.local
 userPassword: {SSHA}jfMnhJOLwYb6SUzU7QaGCZ/DcnLBWo6g
 uidNumber: 10002
-gidNumber: 10002
+gidNumber: 10003
 homeDirectory: /nonexistent
 loginShell: /sbin/nologin
 gecos: Windows User
