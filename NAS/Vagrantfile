@@ -4,6 +4,7 @@ Vagrant.configure("2") do |config|
    nas.vm.hostname = "nas.local"
    nas.vm.network "private_network", ip: "192.168.10.10"
    nas.vm.provider "vmware_desktop" do |vmware|
+      vmware.gui = ENV['VAGRANT_GUI'] == 'true' 
       vmware.memory = 2048
       vmware.linked_clone = false
       disk1 = File.expand_path("disque2.vmdk", File.dirname(__FILE__))
@@ -31,6 +32,7 @@ Vagrant.configure("2") do |config|
       ldap.vm.hostname = "ldap.local"
       ldap.vm.network "private_network", ip: "192.168.10.20"
       ldap.vm.provider "vmware_desktop" do |vmware|
+         vmware.gui = ENV['VAGRANT_GUI'] == 'true' 
          vmware.memory = 1024
          vmware.linked_clone = false
       end
@@ -45,6 +47,7 @@ Vagrant.configure("2") do |config|
       backup.vm.hostname = "backup.local"
       backup.vm.network "private_network", ip: "192.168.10.30"
       backup.vm.provider "vmware_desktop" do |vmware|
+         vmware.gui = ENV['VAGRANT_GUI'] == 'true' 
          vmware.memory = 1024
          vmware.linked_clone = false
       end

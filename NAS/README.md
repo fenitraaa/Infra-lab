@@ -30,15 +30,28 @@ Verify if all disk are recognized by nas server
 
 ![lsblk](screenshot/NAS-lsblk.png)
 
+
+## NB: ALL ANSIBLE PLAYBOOKS ARE EXECUTED FROM HOST.
+
 ## LDAP Configuration
 
 Directory Information Tree (DIT)
 
 ![DIT](screenshot/DIT.png)
 
+launch ansible-playbook
+
+```
+ansible-playbook site.yml --ask-vault-pass --tags openldap
+```
+![ansible-playbook command](screenshot/tags-openldap.png)
+
+
 Create ansible/group_vars/ldap/vault.yml
 ```
 ldap_admin_password: your password
+vault_linuxuser_password: linuxpassword
+vault_windowsuser_password: windowspassword
 ```
 and encrypt it:
 ```
@@ -51,8 +64,21 @@ chmod +x ./ldapadd_script.sh
 ./ldapadd_script.sh
 ```
 ![](screenshot/ldapadd_script.png)
-launch ansible-playbook
+
+## NAS Configurations
+
+Firstly, we need to distribute and update CA certificate using this playbook's command.
 ```
-ansible-playbook site.yml --ask-vault-pass --ask-become-pass
+ansible-playbook site.yml --ask-vault-pass --tags nas_ca_dist
 ```
-![ansible-playbook command](screenshot/ansible-ldap.png)
+
+![nas_dist](screenshot/tags-nas_ca_dist.png)
+
+Then, install and configure samba so client nas can interact with ldap server and all client.
+
+```
+ansible-playbook site.yml --ask-vault-pass --tags nas_samba --asks-become-pass
+```
+> This playbook need privilege mode so using `--asks-become-pass` flag is necessary. By default, the password is: `vagrant`.
+
+![nas_samba](screenshot/tags-nas_samba.png)
