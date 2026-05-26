@@ -22,7 +22,10 @@ Vagrant.configure("2") do |config|
       vmware.vmx["sata0:4.fileName"] = disk3
       vmware.vmx["sata0:4.redo"]     = ""
       end
-   end
+      config.vm.provision "shell", inline: <<-SHELL
+         apt-get update -y
+      SHELL
+      end
 
    config.vm.define "ldap" do |ldap|
       ldap.vm.hostname = "ldap.local"
@@ -45,5 +48,8 @@ Vagrant.configure("2") do |config|
          vmware.memory = 1024
          vmware.linked_clone = false
       end
-   end
+      config.vm.provision "shell", inline: <<-SHELL
+         apt-get update -y
+      SHELL
+      end
 end

@@ -1,17 +1,17 @@
-dn: cn=windows,ou=group,dc=lab,dc=local
-objectClass: top
-objectClass: groupOfNames
-cn: windows
-member: uid=placeholder,ou=people,dc=lab,dc=local
+dn: cn=linux,ou=group,dc=lab,dc=local
+objectClass: posixGroup
+cn: linux
+gidNumber: 10001
+memberUid: linuxuser
 
 dn: cn=admins,ou=group,dc=lab,dc=local
-objectClass: top
-objectClass: groupOfNames
+objectClass: posixGroup
 cn: admins
-member: uid=placeholder,ou=people,dc=lab,dc=local
+gidNumber: 10002
+memberUid: linuxuser
 
-dn: cn=linux,ou=group,dc=lab,dc=local
-objectClass: top
-objectClass: groupOfNames
-cn: linux
-member: uid=placeholder,ou=people,dc=lab,dc=local
+dn: cn=windows,ou=group,dc=lab,dc=local
+objectClass: posixGroup
+cn: windows
+gidNumber: 10003
+memberUid: windowsuser

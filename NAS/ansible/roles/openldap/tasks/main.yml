@@ -17,6 +17,7 @@
       - slapd
       - ldap-utils
       - python3-cryptography
+      - python3-ldap
     state: present
     update_cache: yes
 
@@ -25,6 +26,13 @@
     name: slapd
     state: started
     enabled: true
+    
+- name: Configure slapd to listen on LDAPS port 636
+  ansible.builtin.lineinfile:
+    path: /etc/default/slapd
+    regexp: '^SLAPD_SERVICES='
+    line: 'SLAPD_SERVICES="ldap:/// ldaps:/// ldapi:///"'
+  notify: Restart slapd
 
 - name: Create SSL directories
   ansible.builtin.file:

@@ -2,3 +2,8 @@
   ansible.builtin.service:
     name: smbd
     state: restarted
+
+- name: Restart SSSD
+  ansible.builtin.service:
+    name: sssd
+    state: restarted
