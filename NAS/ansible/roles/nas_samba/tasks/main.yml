@@ -48,3 +48,21 @@
     name: smbd
     state: started
     enabled: true
+
+- name: Add users to Samba tdbsam
+  ansible.builtin.shell: |
+    if ! pdbedit -L | grep -q "^{{ item.user }}:"; then
+      printf '%s\n%s\n' '{{ item.password }}' '{{ item.password }}' | smbpasswd -a -s {{ item.user }}
+    fi
+  loop:
+    - { user: linuxuser,   password: "{{ vault_linuxuser_password }}" }
+    - { user: windowsuser, password: "{{ vault_windowsuser_password }}" }
+  no_log: true
+  changed_when: false
+
+- name: Enable Samba users
+  ansible.builtin.shell: smbpasswd -e {{ item }}
+  loop:
+    - linuxuser
+    - windowsuser
+  changed_when: false
