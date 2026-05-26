@@ -39,14 +39,6 @@ Directory Information Tree (DIT)
 
 ![DIT](screenshot/DIT.png)
 
-launch ansible-playbook
-
-```
-ansible-playbook site.yml --ask-vault-pass --tags openldap
-```
-![ansible-playbook command](screenshot/tags-openldap.png)
-
-
 Create ansible/group_vars/ldap/vault.yml
 ```
 ldap_admin_password: your password
@@ -57,6 +49,16 @@ and encrypt it:
 ```
 ansible-vault encrypt group_vars/ldap/vault.yml
 ```
+
+launch ansible-playbook
+
+```
+ansible-playbook site.yml --ask-vault-pass --tags openldap
+```
+![ansible-playbook command](screenshot/tags-openldap.png)
+
+
+
 Execute the scipt to automate ldif configurations
 ``` 
 cd /vagrant/ldap
