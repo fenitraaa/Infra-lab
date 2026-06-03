@@ -1,0 +1,142 @@
+pipeline {
+    agent {
+        kubernetes {
+            yamlFile 'volet-0/frontend/k8s/CI/pod-agent-jenkins.yaml'
+            defaultContainer 'jnlp'
+        }
+    }
+    environment {
+        PROJECT_NAME = "volet0-frontend"
+        MAIL_TO = "tojonirinafenitra8@gmail.com"
+    }
+    stages {
+        stage ('clone le projet') {
+            steps {
+                echo 'Clonage du projet...'
+                checkout scm
+                script {
+                    env.BRANCH_NAME = "${GIT_BRANCH}"
+                    env.GIT_COMMIT = sh(script: "git rev-parse --short HEAD", returnStdout: true).trim()
+                    env.IMAGE_TAG = "${env.GIT_COMMIT}"
+                    env.GIT_MESSAGE = sh(script: "git log -1 --pretty=%B", returnStdout: true).trim()
+                }
+            }
+        }
+        stage('Installation des dépendances') {
+            steps {
+                container('node-linter') {
+                    sh '''
+                    set -e
+
+                    PROJECT_DIR="${WORKSPACE}/volet-0/frontend"
+
+                    cd "$PROJECT_DIR"
+                    npm ci
+                    '''
+                }
+            }
+        }
+        stage('Lancement du build') {
+            steps {
+                container('node-linter') {
+                    sh '''
+                    set -e
+
+                    PROJECT_DIR="${WORKSPACE}/volet-0/frontend"
+
+                    cd "$PROJECT_DIR"
+                    npm run build
+                    '''
+                }
+            }
+        }
+        stage('build et push de l\'image vers le registre') {
+            steps {
+                container('docker-cli') {
+                    withCredentials([
+                        usernamePassword(
+                            credentialsId: 'git-https-token', 
+                            usernameVariable: 'GITHUB_USER', 
+                            passwordVariable: 'GITHUB_PASS'
+                        )]) {
+                        sh '''
+                        set -e
+                        cd "$WORKSPACE/volet-0/frontend"
+                        echo "$GITHUB_PASS" | docker login ghcr.io -u "$GITHUB_USER" --password-stdin
+                        docker build -t ghcr.io/codel-open-contrib/volet0-frontend-maitrezaky:$IMAGE_TAG .
+                        docker push ghcr.io/codel-open-contrib/volet0-frontend-maitrezaky:$IMAGE_TAG
+                        docker logout
+                        '''
+                    }
+                }
+            }
+        }
+        stage('push vers le cluster Kubernetes') {
+            steps {
+                container('kubectl') {
+                    sh '''
+                    set -e
+                    cd "$WORKSPACE/volet-0/frontend/k8s/CI"
+                    kubectl set image deployment/volet0-frontend-deployment frontend-container=ghcr.io/codel-open-contrib/volet0-frontend-maitrezaky:$IMAGE_TAG -n dev
+                    kubectl rollout status deployment/volet0-frontend-deployment -n dev
+                    '''
+                }
+            }
+        }
+    }
+    post {
+        success {
+            echo "Pipeline SUCCESS"
+            withCredentials([
+                usernamePassword(
+                    credentialsId: 'email-token',
+                    usernameVariable: 'GMAIL_USER', 
+                    passwordVariable: 'GMAIL_PASS'
+                    )
+                ]) {
+                emailext(
+                    subject: "SUCCESS - ${PROJECT_NAME} (${BUILD_NUMBER})",
+                    body: """
+                    Build SUCCESS
+
+                    Projet : ${PROJECT_NAME}
+                    Branch  : ${BRANCH_NAME}
+                    Commit  : ${GIT_COMMIT}
+                    Message : ${GIT_MESSAGE}
+                    Build   : #${BUILD_NUMBER}
+                    """,
+                    to: "${MAIL_TO}",
+                    from: "${GMAIL_USER}"
+                )
+            }
+        }
+        failure {
+            echo "Pipeline FAILURE"
+            withCredentials([
+                usernamePassword(
+                    credentialsId: 'email-token',
+                    usernameVariable: 'GMAIL_USER',
+                    passwordVariable: 'GMAIL_PASS'
+                )
+            ]) {
+                emailext(
+                    subject: "FAILURE - ${PROJECT_NAME} (${BUILD_NUMBER})",
+                    body: """
+                    Build FAILED
+
+                    Projet : ${PROJECT_NAME}
+                    Branch  : ${BRANCH_NAME}
+                    Commit  : ${GIT_COMMIT}
+                    Message : ${GIT_MESSAGE}
+                    Build   : #${BUILD_NUMBER}
+
+                    logs:
+                    ${BUILD_URL}
+                    """,
+                    to: "${MAIL_TO}",
+                    from: "${GMAIL_USER}"
+                )
+            }
+        }
+    }
+}

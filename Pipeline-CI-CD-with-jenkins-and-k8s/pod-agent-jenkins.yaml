@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    app: jenkins-agent
+  namespace: jenkins
+spec:
+  serviceAccountName: static-sa
+  securityContext:
+    fsGroup: 1000
+
+  containers:
+    # Conteneur Jenkins agent (jnlp)
+    - name: jnlp
+      image: jenkins/inbound-agent:latest
+      volumeMounts:
+        - name: workspace-volume
+          mountPath: /home/jenkins/agent
+      env: 
+        - name: JAVA_OPTS
+          value: "-Djenkins.slaveAgentPort=50000"
+      tty: true
+      stdin: true 
+
+    # Conteneur node-linter
+    - name: node-linter
+      image: node:22.21-alpine
+      command: ["/bin/sh", "-c", "sleep infinity"]
+      tty: true
+      volumeMounts:
+        - name: workspace-volume
+          mountPath: /home/jenkins/agent
+
+    # Conteneur kubectl
+    - name: kubectl
+      image: lachlanevenson/k8s-kubectl:latest
+      command: ["cat"]
+      tty: true
+      volumeMounts:
+        - name: workspace-volume
+          mountPath: /home/jenkins/agent
+          
+    # Conteneur docker-cli
+    - name: docker-cli
+      image: docker:29.1.1-cli
+      command: ["sleep", "infinity"]
+      volumeMounts:
+        - name: workspace-volume
+          mountPath: /home/jenkins/agent
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+
+  # Volumes partagés
+  volumes:
+    - name: workspace-volume
+      emptyDir: {}
+    - name: docker-socket
+      hostPath:
+        path: /var/run/docker.sock
+        type: Socket
