@@ -118,18 +118,16 @@ All containers share:
 
 ### 1. Connecting to the Kubernetes Cluster
 
-Under **Manage Jenkins → Clouds**, create a Kubernetes Cloud with:
+Kubernetes Cloud with:
 
-- **Name:** `k8s-jenkins`
-- **Kubernetes URL:** your cluster API server URL
-- **Kubernetes Namespace:** `jenkins`
-- **Credentials:** `jenkins-token` (token of the `static-sa` ServiceAccount)
+- Name: `k8s-jenkins`
+- Kubernetes URL your cluster API server URL
+- Kubernetes Namespace `jenkins`
+- Credentials `jenkins-token` (token of the `static-sa` ServiceAccount)
 
 ![K8s Jenkins Cloud Configuration](images/config-jenkins-k8s.png)
 
 ### 2. Required Credentials
-
-Add the following credentials under **Manage Jenkins → Credentials**:
 
 | ID | Type | Purpose |
 |----|------|---------|
