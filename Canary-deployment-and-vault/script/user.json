@@ -1,0 +1,47 @@
+{
+  "sudo_commands": {
+    "common": [
+      "/usr/bin/apt-get",
+      "/usr/bin/apt",
+      "/usr/bin/mkdir",
+      "/usr/bin/cp",
+      "/usr/bin/chown",
+      "/usr/bin/chmod"
+    ],
+    "vault": [
+      "/usr/local/bin/vault",
+      "/bin/systemctl start vault",
+      "/bin/systemctl stop vault",
+      "/bin/systemctl restart vault",
+      "/bin/systemctl status vault"
+    ],
+    "postgres": [
+      "/usr/bin/psql",
+      "/bin/systemctl start postgresql",
+      "/bin/systemctl stop postgresql",
+      "/bin/systemctl restart postgresql",
+      "/bin/systemctl status postgresql"
+    ],
+    "haproxy": [
+      "/usr/sbin/haproxy",
+      "/bin/systemctl start haproxy",
+      "/bin/systemctl stop haproxy",
+      "/bin/systemctl restart haproxy",
+      "/bin/systemctl status haproxy"
+    ]
+  },
+  "users": [
+    {
+      "name": "ansible",
+      "group": "ansible",
+      "groups": [],
+      "sudo": "common+role"
+    },
+    {
+      "name": "admin",
+      "group": "admin",
+      "groups": ["adm"],
+      "sudo": "role"
+    }
+  ]
+}
