@@ -53,7 +53,6 @@ def user_has_password(username):
         status_info = result.stdout.strip().split()
         status = status_info[1]
         if status == "P":
-            print(f"{username} has password already.")
             return True
     except subprocess.CalledProcessError:
         return False
@@ -61,12 +60,13 @@ def user_has_password(username):
 def create_users():
     data = load_config()
     users = data.get("users", [])
+    print("== USER CREATION ==")
     for user in users:
         username = user["name"]
         primary_group = user["group"]
         secondary_group = user.get("groups", [])
 
-        print(f"User: {username}")
+        print(f"[ ] USER: {username.swapcase()}")
         if group_exist(primary_group):
             pass
         else:
@@ -94,7 +94,35 @@ def create_users():
             else:
                 run_command(f"useradd -m -s /bin/bash -g {primary_group} -p {crypted_password} {username}")
             print("User added.")
+        print(f"[+] USER: {username.swapcase()}")
+
+def config_ssh():
+    data  = load_config()
+    users = data.get("users", [])   
+    print("== SSH CONFIGURATION FOR ALL CREATED USER ==")
+    for user in users:
+        username = user["name"]
+        key_file = user.get("pub_key", "")
+        print(f"[ ] USER: {username.swapcase()}")
+        if not key_file or not os.path.isfile(key_file):
+            print(f"Public key for {username.swapcase()} not found.")
+            continue
+        else:
+            with open(key_file, "r") as k:
+                value = k.read().strip()
+            ssh_dir = f"/home/{username}/.ssh"
+            auth_keys   = f"{ssh_dir}/authorized_keys"
+            os.makedirs(ssh_dir, mode=0o700, exist_ok=True)
+            with open(auth_keys, "w") as f:
+                f.write(value + "\n")
+            uid = pwd.getpwnam(username).pw_uid
+            gid = pwd.getpwnam(username).pw_gid
+            os.chown(ssh_dir, uid, gid)
+            os.chown(auth_keys, uid, gid)
+            os.chmod(auth_keys, 0o600)
+            print(f"[+] USER: {username.swapcase()}")
 
 
 if __name__ == "__main__":
     create_users()
+    config_ssh()

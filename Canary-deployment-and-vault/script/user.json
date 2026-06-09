@@ -1,47 +1,47 @@
 {
   "sudo_commands": {
-    "common": [
-      "/usr/bin/apt-get",
-      "/usr/bin/apt",
-      "/usr/bin/mkdir",
-      "/usr/bin/cp",
-      "/usr/bin/chown",
-      "/usr/bin/chmod"
+    "services": [
+      "/bin/systemctl status *",
+      "/bin/systemctl restart *",
+      "/bin/systemctl stop *",
+      "/bin/systemctl start *"
     ],
-    "vault": [
-      "/usr/local/bin/vault",
-      "/bin/systemctl start vault",
-      "/bin/systemctl stop vault",
-      "/bin/systemctl restart vault",
-      "/bin/systemctl status vault"
+    "logs": [
+      "/usr/bin/journalctl",
+      "/usr/bin/tail",
+      "/usr/bin/cat"
     ],
-    "postgres": [
-      "/usr/bin/psql",
-      "/bin/systemctl start postgresql",
-      "/bin/systemctl stop postgresql",
-      "/bin/systemctl restart postgresql",
-      "/bin/systemctl status postgresql"
+    "reseau": [
+      "/sbin/ip",
+      "/usr/sbin/ss",
+      "/usr/bin/netstat"
     ],
-    "haproxy": [
-      "/usr/sbin/haproxy",
-      "/bin/systemctl start haproxy",
-      "/bin/systemctl stop haproxy",
-      "/bin/systemctl restart haproxy",
-      "/bin/systemctl status haproxy"
-    ]
+    "diagnostic": [
+      "/usr/bin/top",
+      "/usr/bin/htop",
+      "/usr/bin/df",
+      "/usr/bin/du",
+      "/usr/bin/free"
+    ],
+    "roles": {
+      "ansible": "ALL",
+      "devops": ["services", "logs", "reseau", "diagnostic"]
+    }
   },
   "users": [
     {
       "name": "ansible",
       "group": "ansible",
       "groups": [],
-      "sudo": "common+role"
+      "sudo": "ansible",
+      "pub_key": "lab-ansible.pub"
     },
     {
-      "name": "admin",
-      "group": "admin",
+      "name": "tojo",
+      "group": "devops",
       "groups": ["adm"],
-      "sudo": "role"
+      "sudo": "devops",
+      "pub_key": "lab-tojo.pub"
     }
   ]
 }
