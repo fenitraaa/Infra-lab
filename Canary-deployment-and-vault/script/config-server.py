@@ -17,10 +17,11 @@ def load_config():
 def run_command(command):
     subprocess.run(command, shell=True, check=True)
 
-def name_exist(name):
+def name_exist(name, silent=False):
     try:
         username = pwd.getpwnam(name)
-        print (f"User already exist: {username.pw_name}.")
+        if not silent:
+            print (f"User already exist: {username.pw_name}.")
         return True
     except KeyError:
         return False
@@ -99,7 +100,7 @@ def create_users():
 def config_ssh():
     data  = load_config()
     users = data.get("users", [])   
-    print("== SSH CONFIGURATION FOR ALL CREATED USER ==")
+    print("\n== SSH CONFIGURATION FOR ALL CREATED USER ==")
     for user in users:
         username = user["name"]
         key_file = user.get("pub_key", "")
@@ -122,7 +123,61 @@ def config_ssh():
             os.chmod(auth_keys, 0o600)
             print(f"[+] USER: {username.swapcase()}")
 
+def config_sudo():
+    data = load_config()
+    users = data.get("users", [])
+    sudo_command = data.get("sudo_commands", {})
+    role = sudo_command["roles"]
+    print("\n== SUDO CONFIGURATION ==")
+    for user in users:
+        username = user["name"]
+        print(f"[ ] USER : {username.swapcase()}")
+        sudo_role = user["sudo"]
+        role_value = role.get(sudo_role)
+        categories = sudo_command.get("categories", {})
+        if role_value == "ALL":
+            run_command(f"usermod -aG sudo {username}")
+            print(f"User {username} added on sudo group.")
+            print(f"[+] USER: {username.swapcase()}")
+        else:
+            cmds = []
+            for cat_name in role_value:
+                for cmd in categories.get(cat_name, []):
+                    cmds.append(cmd)
+            sudoers_file = f"/etc/sudoers.d/{username}"
+            lines = "\n".join(
+                f"{username} ALL=(ALL) NOPASSWD: {cmd}"
+                for cmd in cmds
+            )
+            with open(sudoers_file, "w") as f:
+                f.write(f"\n{lines}\n")
+            os.chmod(sudoers_file, 0o440)
+            print(f"User {username} added on sudoers.")
+            result = subprocess.run(
+                f"visudo -cf {sudoers_file}",
+                shell=True,
+                check=False,
+                capture_output=True
+            )
+            if result.returncode != 0:
+                os.remove(sudoers_file)
+                print(f"misy olana ndray lety : {username}")
+                sys.exit(1)
+    print(f"[+] USER: {username.swapcase()}")
+            
+def disable_user_vagrant():
+    print("\n== DISABLE USER VAGRANT ==")
+    if name_exist("vagrant", silent=True):
+        run_command("usermod -L vagrant")
+        run_command("usermod -s /sbin/nologin vagrant")
+        print("[+] USER Vagrant disabled.")
+    else:
+        print("tsisy anzany ato eh")
+
 
 if __name__ == "__main__":
     create_users()
     config_ssh()
+    config_sudo()
+    disable_user_vagrant()
+    

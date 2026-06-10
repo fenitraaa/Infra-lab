@@ -1,28 +1,30 @@
 {
   "sudo_commands": {
-    "services": [
-      "/bin/systemctl status *",
-      "/bin/systemctl restart *",
-      "/bin/systemctl stop *",
-      "/bin/systemctl start *"
-    ],
-    "logs": [
-      "/usr/bin/journalctl",
-      "/usr/bin/tail",
-      "/usr/bin/cat"
-    ],
-    "reseau": [
-      "/sbin/ip",
-      "/usr/sbin/ss",
-      "/usr/bin/netstat"
-    ],
-    "diagnostic": [
-      "/usr/bin/top",
-      "/usr/bin/htop",
-      "/usr/bin/df",
-      "/usr/bin/du",
-      "/usr/bin/free"
-    ],
+    "categories": {
+      "services": [
+        "/bin/systemctl status *",
+        "/bin/systemctl restart *",
+        "/bin/systemctl stop *",
+        "/bin/systemctl start *"
+      ],
+      "logs": [
+        "/usr/bin/journalctl",
+        "/usr/bin/tail",
+        "/usr/bin/cat"
+      ],
+      "reseau": [
+        "/sbin/ip",
+        "/usr/sbin/ss",
+        "/usr/bin/netstat"
+      ],
+      "diagnostic": [
+        "/usr/bin/top",
+        "/usr/bin/htop",
+        "/usr/bin/df",
+        "/usr/bin/du",
+        "/usr/bin/free"
+      ]
+    },
     "roles": {
       "ansible": "ALL",
       "devops": ["services", "logs", "reseau", "diagnostic"]

@@ -10,3 +10,5 @@ RIPv2-and-OSPF/project-files/**/*.txt
 *ghost
 ilt_2023010200_*
 .vscode
+lab-ansible.pub
+.terraform
