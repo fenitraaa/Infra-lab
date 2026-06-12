@@ -5,10 +5,10 @@
     value: "{{ item.value }}"
     vtype: "{{ item.vtype }}"
   loop:
-    - { question: 'slapd/domain',       value: '{{ ldap_domain }}',        vtype: 'string' }
-    - { question: 'slapd/organization', value: '{{ ldap_org }}',            vtype: 'string' }
-    - { question: 'slapd/password1',    value: '{{ ldap_admin_password }}', vtype: 'password' }
-    - { question: 'slapd/password2',    value: '{{ ldap_admin_password }}', vtype: 'password' }
+    - { question: 'slapd/domain', value: '{{ ldap_domain }}', vtype: 'string' }
+    - { question: 'slapd/organization', value: '{{ ldap_org }}', vtype: 'string' }
+    - { question: 'slapd/password1', value: '{{ ldap_admin_password }}', vtype: 'password' }
+    - { question: 'slapd/password2', value: '{{ ldap_admin_password }}', vtype: 'password' }
   no_log: true
 
 - name: Install slapd and ldap-utils
@@ -116,15 +116,15 @@
     mode: "{{ item.mode }}"
   loop:
     - { path: "{{ ldap_ca_cert_path }}", mode: "0644" }
-    - { path: "{{ ldap_cert_path }}",    mode: "0644" }
-    - { path: "{{ ldap_key_path }}",     mode: "0640" }
+    - { path: "{{ ldap_cert_path }}", mode: "0644" }
+    - { path: "{{ ldap_key_path }}", mode: "0640" }
 
 - name: Configure TLS in slapd
   community.general.ldap_attrs:
     dn: cn=config
     attributes:
       olcTLSCACertificateFile: "{{ ldap_ca_cert_path }}"
-      olcTLSCertificateFile:    "{{ ldap_cert_path }}"
+      olcTLSCertificateFile: "{{ ldap_cert_path }}"
       olcTLSCertificateKeyFile: "{{ ldap_key_path }}"
     state: exact
   notify: Restart slapd

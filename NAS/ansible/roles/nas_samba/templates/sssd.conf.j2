@@ -6,23 +6,23 @@ domains = lab.local
 id_provider   = ldap
 auth_provider = ldap
 
-ldap_uri            = ldaps://{{ ldap_server_ip }}
-ldap_search_base    = {{ ldap_base_dn }}
-ldap_tls_cacert     = {{ nas_ca_trust_dir }}/ldap-ca.crt
-ldap_tls_reqcert    = demand
+ldap_uri = ldaps://{{ ldap_server_ip }}
+ldap_search_base = {{ ldap_base_dn }}
+ldap_tls_cacert = {{ nas_ca_trust_dir }}/ldap-ca.crt
+ldap_tls_reqcert = demand
 
 ldap_default_bind_dn = cn=admin,{{ ldap_base_dn }}
 ldap_default_authtok = {{ ldap_admin_password }}
 
 ldap_user_object_class  = posixAccount
-ldap_user_name          = uid
+ldap_user_name = uid
 
 ldap_group_object_class = posixGroup
-ldap_group_name         = cn
-ldap_group_member       = memberUid
+ldap_group_name = cn
+ldap_group_member = memberUid
 
-ldap_user_search_base  = ou=people,{{ ldap_base_dn }}
+ldap_user_search_base = ou=people,{{ ldap_base_dn }}
 ldap_group_search_base = ou=group,{{ ldap_base_dn }}
 
 cache_credentials = true
-enumerate         = true
+enumerate = true
