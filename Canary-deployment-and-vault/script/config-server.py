@@ -34,30 +34,6 @@ def group_exist(group_name):
     except KeyError:
         return False
 
-def encrypt_password(password):
-    input_passord = subprocess.run(
-        ["openssl", "passwd", "-6", password],
-        text=True,
-        capture_output=True,
-        check=True
-    )
-    return input_passord.stdout.strip()
-
-def user_has_password(username):
-    try:
-        result = subprocess.run(
-            ["passwd", "-S", username],
-            text=True,
-            capture_output=True,
-            check=True
-        )
-        status_info = result.stdout.strip().split()
-        status = status_info[1]
-        if status == "P":
-            return True
-    except subprocess.CalledProcessError:
-        return False
-
 def create_users():
     data = load_config()
     users = data.get("users", [])
@@ -79,21 +55,14 @@ def create_users():
             else:
                 run_command(f"groupadd {sec_group}")
                 print("Secondary Group added.")
-        if name_exist(username):
-            if not user_has_password(username):
-                password = os.getenv("PASSWD")
-                crypted_password = encrypt_password(password)
-                run_command(f"usermod -p {crypted_password} {username}")
-            else:
-                print(f"Password already exists for user {username}")
+        if name_exist(username, silent=True): 
+            print(f"User {username} already exist.")
         else:
-            password = os.getenv("PASSWD")
-            crypted_password = encrypt_password(password)
             if secondary_group:
                 group_join = ",".join(secondary_group)
-                run_command(f"useradd -m -s /bin/bash -g {primary_group} -G {group_join} -p {crypted_password} {username}")
+                run_command(f"useradd -m -s /bin/bash -g {primary_group} -G {group_join} {username}")
             else:
-                run_command(f"useradd -m -s /bin/bash -g {primary_group} -p {crypted_password} {username}")
+                run_command(f"useradd -m -s /bin/bash -g {primary_group} {username}")
             print("User added.")
         print(f"[+] USER: {username.swapcase()}")
 
@@ -138,6 +107,10 @@ def config_sudo():
         if role_value == "ALL":
             run_command(f"usermod -aG sudo {username}")
             print(f"User {username} added on sudo group.")
+            sudoers_file = f"/etc/sudoers.d/{username}"
+            with open(sudoers_file, "w") as f:
+                    f.write(f"{username} ALL=(ALL) NOPASSWD: ALL\n")
+                    print(f"sudoers file created for user {username}")
             print(f"[+] USER: {username.swapcase()}")
         else:
             cmds = []
@@ -169,15 +142,34 @@ def disable_user_vagrant():
     print("\n== DISABLE USER VAGRANT ==")
     if name_exist("vagrant", silent=True):
         run_command("usermod -L vagrant")
-        run_command("usermod -s /sbin/nologin vagrant")
-        print("[+] USER Vagrant disabled.")
+        print("[+] Password for USER Vagrant disabled.")
     else:
         print("tsisy anzany ato eh")
 
+def harden_ssh():
+    os.makedirs("/etc/ssh/sshd_config.d", exist_ok=True)
+    print("== HARDENING SSH CONGIGURATIONS")
+    config = (
+        "PermitRootLogin no\n"
+        "PasswordAuthentication no\n"
+        "PubkeyAuthentication yes\n"
+        "MaxAuthTries 3\n"
+        "AllowAgentForwarding no\n"
+        "X11Forwarding no\n"
+        "ClientAliveInterval 300\n"
+        "ClientAliveCountMax 2\n"
+    )
+    with open("/etc/ssh/sshd_config.d/hardening.conf", "w") as f:
+        f.write(config)
+
+    run_command("sshd -t")
+    run_command("systemctl restart sshd")
+    print("[+] SSH hardened.")
 
 if __name__ == "__main__":
     create_users()
     config_ssh()
     config_sudo()
     disable_user_vagrant()
+    harden_ssh()
     

@@ -10,5 +10,4 @@ RIPv2-and-OSPF/project-files/**/*.txt
 *ghost
 ilt_2023010200_*
 .vscode
-lab-ansible.pub
-.terraform
+Canary-deployment-and-vault/script/*.pub
