@@ -27,6 +27,7 @@
     },
     "roles": {
       "ansible": "ALL",
+      "admin": "ALL",
       "devops": ["services", "logs", "reseau", "diagnostic"]
     }
   },
@@ -37,6 +38,13 @@
       "groups": [],
       "sudo": "ansible",
       "pub_key": "lab-ansible.pub"
+    },
+    {
+      "name": "fenitra",
+      "group": "admin",
+      "groups": [],
+      "sudo": "admin",
+      "pub_key": "lab-fenitra.pub"
     },
     {
       "name": "tojo",

@@ -148,7 +148,7 @@ def disable_user_vagrant():
 
 def harden_ssh():
     os.makedirs("/etc/ssh/sshd_config.d", exist_ok=True)
-    print("== HARDENING SSH CONGIGURATIONS")
+    print("== HARDENING SSH CONGIGURATIONS ==")
     config = (
         "PermitRootLogin no\n"
         "PasswordAuthentication no\n"
