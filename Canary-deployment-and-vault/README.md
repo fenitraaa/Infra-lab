@@ -36,6 +36,8 @@ All autorisation are set for user `Tojo` the devops engineer. So he can execute 
 
 ![tojo](images/tojo-sudo-test.png)
 
+### VAULT CLUSTER CONFIGURATION
+
 ```bash
 ansible-playbook -i inventory.yml site.yml --tags vault-installation --limit vault-1
 ```

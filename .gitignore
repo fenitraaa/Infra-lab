@@ -11,3 +11,6 @@ RIPv2-and-OSPF/project-files/**/*.txt
 ilt_2023010200_*
 .vscode
 Canary-deployment-and-vault/script/*.pub
+env-infra/
+__pycache__
+.pytest_cache
