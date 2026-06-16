@@ -14,3 +14,4 @@ Canary-deployment-and-vault/script/*.pub
 env-infra/
 __pycache__
 .pytest_cache
+*.kdbx

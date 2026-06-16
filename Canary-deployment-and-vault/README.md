@@ -38,7 +38,44 @@ All autorisation are set for user `Tojo` the devops engineer. So he can execute 
 
 ### VAULT CLUSTER CONFIGURATION
 
+Firstly, we should install and configure vault service for `vault-1` server.
+
+Vault installation using ansible playbooks:
 ```bash
 ansible-playbook -i inventory.yml site.yml --tags vault-installation --limit vault-1
 ```
 ![vault-installation](images/vault-installation.png)
+
+Use Tojo the devops user to configure the first server of our vault cluster.
+```bash
+ssh lab-tojo-vault-1
+```
+
+So we have vault installed within our server vault-1. Right now, we were trying to initialize our vault server using this command:
+```bash
+vault operator init
+```
+
+And the outputs give five `unseal keys` and one `initial root token`. We should save all those keys using `KeePassXC` with linux.
+
+![keepass](images/keepass.png)
+
+And then, we use three for all those five keys with executing this command three times:
+```bash
+vault operator unseal
+```
+> Unseal Key (will be hidden): enter the unseal keys.
+
+To be able for modify all configurations, we should log as administrator.
+```bash
+vault login
+```
+> Token (will be hidden): enter the initial root token.
+
+Our vault server is initialized!!
+
+Verification:
+```bash
+vault status
+```
+![vault-status](images/vault-status.png)
