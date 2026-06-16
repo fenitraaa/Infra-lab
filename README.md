@@ -1,5 +1,5 @@
 # INFRA-LAB
-As a SYSTEM & NETWORK ADMINISTRATOR and DEVOPS/SRE. All my project academic and personal are in this repository with those `Documentation`. Built with these tools:
+As a SYSTEM & NETWORK ADMINISTRATOR and DEVOPS/SRE, all my project academic and personal are in this repository with their `Documentation`. Built with the following tools:
 
 | CONCEPT | TOOLS | VERSION |  
 | ---- | ---- | ---- |
