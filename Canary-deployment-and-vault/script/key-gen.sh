@@ -5,7 +5,7 @@ declare -A SERVERS
 SERVERS["db"]="192.168.10.10"
 SERVERS["vault-1"]="192.168.10.11"
 SERVERS["vault-2"]="192.168.10.12"
-SERVERS["vault-3"]="192.168.10.13"
+SERVERS["haproxy"]="192.168.10.20"
 mkdir -p "$HOME/.ssh"
 echo -n "" > "$HOME/.ssh/config"
 

@@ -21,6 +21,7 @@ And then we can create our servers using vagrant. Inside this vagrantfile, there
 ```bash
 vagrant up
 ```
+Script python outputs:
 
 ![script-output](images/script-output.png)
 

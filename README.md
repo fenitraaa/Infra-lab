@@ -1,5 +1,5 @@
 # INFRA-LAB
-As a SYSTEM & NETWORK ADMINISTRATOR and DEVOPS/SRE, all my project academic and personal are in this repository with their `Documentation`. Built with the following tools:
+As a SYSTEM & NETWORK ADMINISTRATOR and DEVOPS/SRE, all my academic and personal project are in this repository with their `Documentation`. Built with the following tools:
 
 | CONCEPT | TOOLS | VERSION |  
 | ---- | ---- | ---- |
@@ -15,10 +15,9 @@ As a SYSTEM & NETWORK ADMINISTRATOR and DEVOPS/SRE, all my project academic and 
 | Credentials management | Vault HashiCorp<br>KeePass | 1.18.3<br>2.7.12 |
 | Network Tools | GNS3<br>Wireguard<br>Wireshark | 2.2.50<br>1.0.20210914<br>4.6.6  |
 
-You have to create the virtual environnements for `python3`:
+We have to create the virtual environnements for `python3`:
 ```bash
 python3 -m venv env-infra
 source env-infra/bin/activate
 pip install -r requirements.txt
-
 ```
