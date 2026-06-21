@@ -1,0 +1,19 @@
+all:
+  vars:
+    ansible_become: true
+    ansible_become_method: sudo
+    ansible_user: ansible
+    ansible_ssh_private_key_file: ~/.ssh/lab-ansible
+
+  children:
+    db:
+      hosts:
+        db-lab:
+          ansible_host: 192.168.10.10
+    vault:
+      hosts:
+        vault-1:
+          ansible_host: 192.168.10.11
+        vault-2:
+          ansible_host: 192.168.10.12
+

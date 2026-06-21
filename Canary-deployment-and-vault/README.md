@@ -43,7 +43,7 @@ Firstly, we should install and configure vault service for `vault-1` server.
 
 Vault installation using ansible playbooks:
 ```bash
-ansible-playbook -i inventory.yml site.yml --tags vault-installation --limit vault-1
+ansible-playbook -i inventory.yml site.yml --tags vault-installation
 ```
 ![vault-installation](images/vault-installation.png)
 
@@ -80,3 +80,23 @@ Verification:
 vault status
 ```
 ![vault-status](images/vault-status.png)
+
+After vault-1 configurations, it's time to configure vault-2.
+NB: HAproxy server is already created after `vagrant up`
+
+There's no more additionnal configuration but only let vault-2 to join the cluster with this following command:
+`bash
+vault operator raft join http:/192.168.10.11:8200
+`
+![vault-join](images/raft-join.png)
+
+And we have vault-2 with state `follower`. View inside vault-1 server.
+
+`bash
+vault operator raft list-peers
+`
+![vault-list](images/raft-list.png)
+
+HAproxy tell us the truth inside his UI:
+![haproxy](images/HAproxy-UI.png)
+

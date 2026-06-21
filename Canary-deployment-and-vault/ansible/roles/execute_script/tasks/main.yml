@@ -1,0 +1,44 @@
+---
+- name: Install necessary packages
+  ansible.builtin.apt:
+    name:
+      - python3-venv
+    state: present
+    update_cache: true
+
+- name: Create venv
+  ansible.builtin.command:
+    cmd: python3 -m venv /opt/vault-pki/env-infra
+    creates: /opt/vault-pki/env-infra
+  changed_when: false
+
+- name: Install dependencies
+  ansible.builtin.pip:
+    name:
+      - hvac
+      - pytest
+    state: present
+    virtualenv: /opt/vault-pki/env-infra
+
+- name: Copy scripts to the server
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /opt/vault-pki/
+    mode: "0755"
+  loop:
+    - config_pki.py
+    - test_config_pki.py
+  changed_when: false
+
+- name: Run unit test
+  ansible.builtin.command:
+    cmd: /opt/vault-pki/env-infra/bin/pytest /opt/vault-pki/test_config_pki.py -v
+  changed_when: false
+
+- name: Run script
+  ansible.builtin.command:
+    cmd: /opt/vault-pki/env-infra/bin/python3 /opt/vault-pki/config_pki.py
+  environment:
+    VAULT_ADDR: "http://127.0.0.1:8200"
+    VAULT_TOKEN: "{{ vault_token }}"
+  changed_when: false
