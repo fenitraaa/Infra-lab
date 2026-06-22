@@ -6,6 +6,8 @@ SERVERS["db"]="192.168.10.10"
 SERVERS["vault-1"]="192.168.10.11"
 SERVERS["vault-2"]="192.168.10.12"
 SERVERS["haproxy"]="192.168.10.20"
+SERVERS["k3s"]="192.168.10.30"
+
 mkdir -p "$HOME/.ssh"
 echo -n "" > "$HOME/.ssh/config"
 

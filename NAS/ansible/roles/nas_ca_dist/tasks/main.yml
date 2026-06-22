@@ -2,7 +2,7 @@
   ansible.builtin.fetch:
     src: "{{ ldap_ca_cert_path }}"
     dest: /tmp/ldap-ca.crt
-    flat: yes
+    flat: true
   delegate_to: ldap.local
 
 - name: Create CA trust directory

@@ -54,6 +54,7 @@ ssh lab-tojo-vault-1
 
 So we have vault installed within our server vault-1. Right now, we were trying to initialize our vault server using this command:
 ```bash
+export VAULT_ADDR="http://127.0.0.1:8200"
 vault operator init
 ```
 
@@ -84,9 +85,15 @@ vault status
 After vault-1 configurations, it's time to configure vault-2.
 NB: HAproxy server is already created after `vagrant up`
 
+Don't forget to `unseal` vault-2
+```bash
+vault operator unseal
+```
+> Unseal Key (will be hidden): enter the unseal keys.
+
 There's no more additionnal configuration but only let vault-2 to join the cluster with this following command:
 ```bash
-vault operator raft join http:/192.168.10.11:8200
+vault operator raft join http://192.168.10.11:8200
 ```
 ![vault-join](images/raft-join.png)
 

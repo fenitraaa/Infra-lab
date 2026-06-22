@@ -2,7 +2,7 @@ import hvac
 import subprocess
 import os
 
-server_issue_cert = { 
+server_issue_cert = {
     "vault-1": "192.168.10.11",
     "db": "192.168.10.10",
     "vault-2": "192.168.10.12",
@@ -26,7 +26,7 @@ def server_actif(server):
     else:
         print(f"Server {server.swapcase()} inactif.")
         return False
-    
+
 def enable_pki_mode(client, path="pki", max_lease_ttl="87600h"):
         try:
             client.sys.enable_secrets_engine(
@@ -65,19 +65,19 @@ def generate_ca(client):
         print("Root CA generated and saved to /tmp/ca.crt")
         print("[+] Ca.crt genereted.\n")
         return cert
-    
+
 def configure_urls(client):
     client.secrets.pki.set_urls(
         params={
-            "issuing_certificates": f"http://192.168.10.20/v1/pki/ca/pem",
-            "crl_distribution_points": f"http://192.168.10.20/v1/pki/crl"
+            "issuing_certificates": f"http://192.168.10.20:8200/v1/pki/ca/pem",
+            "crl_distribution_points": f"http://192.168.10.20:8200/v1/pki/crl"
         },
         mount_point="pki"
     )
     client.secrets.pki.set_urls(
         params={
-            "issuing_certificates": f"http://192.168.10.20/v1/pki_int/ca/pem",
-            "crl_distribution_points": f"http://192.168.10.20/v1/pki_int/crl"
+            "issuing_certificates": f"http://192.168.10.20:8200/v1/pki_int/ca/pem",
+            "crl_distribution_points": f"http://192.168.10.20:8200/v1/pki_int/crl"
         },
         mount_point="pki_int"
     )
@@ -110,14 +110,11 @@ def sign_intermediate(client, csr):
     certificate = response["data"]["certificate"]
     issuing_ca  = response["data"]["issuing_ca"]
     full_chain = certificate + "\n" + issuing_ca
-    with open("/tmp/pki_int.crt", "w") as f:
-        f.write(certificate)
-    print("Intermediate CA signed and saved to /tmp/pki_int.crt")
     with open("/tmp/pki_int_chain.crt", "w") as f:
         f.write(full_chain)
     print("Full chain saved to /tmp/pki_int_chain.crt")
     return full_chain
-    
+
 def set_signed_intermediate(client, certificate):
     client.secrets.pki.set_signed_intermediate(
         certificate=certificate,
@@ -162,8 +159,6 @@ def save_certificates(certs):
             f.write(cert["certificate"])
         with open(f"/tmp/certs/{server}/{server}.key", "w") as f:
             f.write(cert["private_key"])
-        with open(f"/tmp/certs/{server}/{server}-ca.crt", "w") as f:
-            f.write(cert["issuing_ca"])
         print(f"Certificate and key for {server} saved succesfully.")
 
 def main():

@@ -9,14 +9,13 @@
       - libnss-sss
       - acl
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Disable NSCD
   ansible.builtin.service:
     name: nscd
     state: stopped
     enabled: false
-  ignore_errors: true
 
 - name: Deploy smb.conf
   ansible.builtin.template:
@@ -68,10 +67,13 @@
 
 - name: Add users to Samba tdbsam
   ansible.builtin.shell: |
+    set -o pipefail
     if ! pdbedit -L | grep -q "^{{ item.user }}:"; then
       printf '%s\n%s\n' '{{ item.password }}' '{{ item.password }}' | smbpasswd -a -s {{ item.user }}
     fi
     smbpasswd -e {{ item.user }}
+  args:
+    executable: /bin/bash
   loop:
     - { user: linuxuser, password: "{{ vault_linuxuser_password }}" }
     - { user: windowsuser, password: "{{ vault_windowsuser_password }}" }
@@ -107,7 +109,7 @@
     entity: "{{ item }}"
     etype: group
     permissions: rwx
-    default: yes
+    default: true
     state: present
   loop:
     - linux

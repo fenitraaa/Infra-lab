@@ -19,14 +19,14 @@
       - python3-cryptography
       - python3-ldap
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Ensure slapd is started and enabled
   ansible.builtin.service:
     name: slapd
     state: started
     enabled: true
-    
+
 - name: Configure slapd to listen on LDAPS port 636
   ansible.builtin.lineinfile:
     path: /etc/default/slapd
