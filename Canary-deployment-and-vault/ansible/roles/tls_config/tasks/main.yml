@@ -1,0 +1,86 @@
+---
+- name: Create TLS directory
+  ansible.builtin.file:
+    path: /opt/vault/tls
+    state: directory
+    owner: "{{ 'vault' if inventory_hostname in groups['vault'] else 'root' }}"
+    group: "{{ 'vault' if inventory_hostname in groups['vault'] else 'root' }}"
+    mode: "0750"
+
+- name: Copy TLS certificate (local for vault-1)
+  ansible.builtin.copy:
+    src: "/tmp/certs/{{ inventory_hostname }}/{{ inventory_hostname }}.crt"
+    dest: /opt/vault/tls/vault.crt
+    owner: vault
+    group: vault
+    mode: "0644"
+    remote_src: true
+  when: inventory_hostname == "vault-1"
+
+- name: Copy TLS private key (local for vault-1)
+  ansible.builtin.copy:
+    src: "/tmp/certs/{{ inventory_hostname }}/{{ inventory_hostname }}.key"
+    dest: /opt/vault/tls/vault.key
+    owner: vault
+    group: vault
+    mode: "0640"
+    remote_src: true
+  when: inventory_hostname == "vault-1"
+
+- name: Fetch certificate from vault-1
+  ansible.builtin.fetch:
+    src: "/tmp/certs/{{ inventory_hostname }}/{{ inventory_hostname }}.crt"
+    dest: "/tmp/fetched/{{ inventory_hostname }}.crt"
+    flat: true
+  delegate_to: vault-1
+  when: inventory_hostname != "vault-1"
+
+- name: Fetch private key from vault-1
+  ansible.builtin.fetch:
+    src: "/tmp/certs/{{ inventory_hostname }}/{{ inventory_hostname }}.key"
+    dest: "/tmp/fetched/{{ inventory_hostname }}.key"
+    flat: true
+  delegate_to: vault-1
+  when: inventory_hostname != "vault-1"
+
+- name: Copy certificate to node
+  ansible.builtin.copy:
+    src: "/tmp/fetched/{{ inventory_hostname }}.crt"
+    dest: "/opt/vault/tls/vault.crt"
+    owner: "{{ 'vault' if inventory_hostname in groups['vault'] else 'root' }}"
+    group: "{{ 'vault' if inventory_hostname in groups['vault'] else 'root' }}"
+    mode: "0644"
+  when: inventory_hostname != "vault-1"
+
+- name: Copy private key to node
+  ansible.builtin.copy:
+    src: "/tmp/fetched/{{ inventory_hostname }}.key"
+    dest: "/opt/vault/tls/vault.key"
+    owner: "{{ 'vault' if inventory_hostname in groups['vault'] else 'root' }}"
+    group: "{{ 'vault' if inventory_hostname in groups['vault'] else 'root' }}"
+    mode: "0640"
+  when: inventory_hostname != "vault-1"
+
+- name: Fetch CA chain from vault-1
+  ansible.builtin.fetch:
+    src: /tmp/pki_int_chain.crt
+    dest: /tmp/vault-chain.crt
+    flat: true
+  delegate_to: vault-1
+  run_once: true
+
+- name: Copy CA chain to all nodes
+  ansible.builtin.copy:
+    src: /tmp/vault-chain.crt
+    dest: /usr/local/share/ca-certificates/vault-chain.crt
+    mode: "0644"
+
+- name: Update CA certificates
+  ansible.builtin.command: update-ca-certificates
+  changed_when: false
+
+- name: Restart Vault
+  ansible.builtin.systemd:
+    name: vault
+    state: restarted
+  when: inventory_hostname in groups['vault']

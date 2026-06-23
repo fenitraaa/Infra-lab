@@ -21,3 +21,17 @@
   tags: execute_script
   roles:
     - role: execute_script
+
+- name: Distribute TLS certificates to all nodes
+  hosts: vault, db-lab, k3s-lab
+  become: true
+  tags: tls_distribution
+  roles:
+    - role: tls_config
+
+- name: Apply TLS config for vault
+  hosts: vault
+  become: true
+  tags: tls_apply
+  roles:
+    - role: tls_apply_vault
