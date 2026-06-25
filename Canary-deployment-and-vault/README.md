@@ -146,3 +146,10 @@ All nodes truste our PKI engine!!!
 Verification inside `db` server:
 
 ![curl](images/curl-vault.png)
+
+### DATABASE CONFIGURATION
+
+
+```bash
+ansible-galaxy collection install community.postgresql
+```
