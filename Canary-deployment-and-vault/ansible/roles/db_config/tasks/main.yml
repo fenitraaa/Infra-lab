@@ -6,3 +6,77 @@
       - python3-psycopg2
     state: present
     update_cache: true
+
+- name: Create preserve database
+  community.postgresql.postgresql_db:
+    name: preserve
+    state: present
+  become: true
+  become_user: postgres
+
+- name: Copy backup file to server
+  ansible.builtin.copy:
+    src: sql/backup-schema.sql
+    dest: /tmp/sql/backup-schema.sql
+    mode: '0644'
+
+- name: Copy template vault-admin sql
+  ansible.builtin.template:
+    src: sql/vault-admin.sql.j2
+    dest: /tmp/sql/vault-admin.sql
+    mode: '0644'
+
+- name: Upload all schema inside the server
+  community.postgresql.postgresql_db:
+    name: preserve
+    state: restore
+    target: /tmp/sql/backup-schema.sql
+  become: true
+  become_user: postgres
+
+- name: Create user vault-admin
+  community.postgresql.postgresql_db:
+    name: preserve
+    state: restore
+    target: /tmp/sql/vault-admin.sql
+  become: true
+  become_user: postgres
+
+- name: Create postgres tls dir
+  ansible.builtin.file:
+    path: /etc/postgresql/tls
+    state: directory
+    owner: postgres
+    group: postgres
+    mode: '0750'
+  become: true
+
+- name: Copy vault tls files to postgres
+  ansible.builtin.copy:
+    src: /opt/vault/tls/{{ item }}
+    dest: /etc/postgresql/tls/{{ item }}
+    owner: postgres
+    group: postgres
+    mode: '0600'
+    remote_src: true
+  become: true
+  loop:
+    - vault.crt
+    - vault.key
+
+- name: Configure PostgreSQL TLS
+  ansible.builtin.lineinfile:
+    path: /etc/postgresql/15/main/postgresql.conf
+    regexp: "^#?{{ item.key }}\\s*="
+    line: "{{ item.key }} = {{ item.value }}"
+  loop:
+    - { key: ssl, value: "on" }
+    - { key: ssl_cert_file, value: "'/etc/postgresql/tls/vault.crt'" }
+    - { key: ssl_key_file, value: "'/etc/postgresql/tls/vault.key'" }
+  become: true
+
+- name: Restart PostgreSQL
+  ansible.builtin.systemd:
+    name: postgresql
+    state: restarted
+  become: true

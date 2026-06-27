@@ -107,6 +107,13 @@ vault operator raft list-peers
 HAproxy tell us the truth inside his UI:
 ![haproxy](images/HAproxy-UI.png)
 
+Or you can use the script inside `script/check-health.sh`.
+```bash
+cd /script
+chmod +x check-health.sh
+./check-health.sh
+```
+
 Copy the Initial Root Token inside the secrets using `ansible-vault`
 ```bash
 ansible-vault edit group_vars/vault/secrets.yml
@@ -149,7 +156,18 @@ Verification inside `db` server:
 
 ### DATABASE CONFIGURATION
 
-
+To configure the database's server, we need to upload inside the server an existing database of my `preserve` project and create the user `vault-admin` that vault server use to rotate automatically the credentials. Just execute the following ansible playbook.
 ```bash
-ansible-galaxy collection install community.postgresql
+ansible-playbook -i inventory.yml site.yml --tags postgres-installation --limit db --ask-vault-pass
+``` 
+![postgres-config](images/pgsql-installation.png)
+
+Verify if all certs are mentionned inside the configuration file with executing the following command on `db server` using `root` user:
+```bash
+grep -n "^ssl" /etc/postgresql/15/main/postgresql.conf
 ```
+![postgresql.conf](images/postgresql-conf.png)
+
+And then our database is configured successfully !!!
+
+### CREDENTIALS AUTO ROTATION CONFIGURATION
