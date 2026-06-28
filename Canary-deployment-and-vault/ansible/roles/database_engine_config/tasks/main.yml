@@ -1,0 +1,16 @@
+- name: Copy scripts to the server
+  ansible.builtin.copy:
+    src: database_engine.py
+    dest: /opt/vault-pki/
+    mode: "0755"
+  changed_when: false
+
+- name: Run script
+  ansible.builtin.command:
+    cmd: /opt/vault-pki/env-infra/bin/python3 /opt/vault-pki/database_engine.py
+  environment:
+    VAULT_ADDR: "https://192.168.10.11:8200"
+    VAULT_TOKEN: "{{ vault_token }}"
+    PASSWORD: "{{ vault_admin }}"
+    VAULT_CACERT: "/usr/local/share/ca-certificates/vault-chain.crt"
+  changed_when: false

@@ -113,6 +113,7 @@ cd /script
 chmod +x check-health.sh
 ./check-health.sh
 ```
+![health-check](images/health-check.png)
 
 Copy the Initial Root Token inside the secrets using `ansible-vault`
 ```bash
@@ -159,7 +160,7 @@ Verification inside `db` server:
 To configure the database's server, we need to upload inside the server an existing database of my `preserve` project and create the user `vault-admin` that vault server use to rotate automatically the credentials. Just execute the following ansible playbook.
 ```bash
 ansible-playbook -i inventory.yml site.yml --tags postgres-installation --limit db --ask-vault-pass
-``` 
+```
 ![postgres-config](images/pgsql-installation.png)
 
 Verify if all certs are mentionned inside the configuration file with executing the following command on `db server` using `root` user:
@@ -171,3 +172,16 @@ grep -n "^ssl" /etc/postgresql/15/main/postgresql.conf
 And then our database is configured successfully !!!
 
 ### CREDENTIALS AUTO ROTATION CONFIGURATION
+
+This step is just enabled the engine who interact with the database server and use the `vault-admin` user to create credentials every hour. 
+The sctipt `database_engine.py` inside the role `database_engine_config` try to automate all this configuration. All we have to do is execute the following command with ansible playbook:
+```bash
+ansible-playbook -i inventory.yml site.yml --tags database_engine --ask-vault-pass
+```
+![database-engine](images/enable-engine.png)
+
+If we connect in vault-1 server using the devops user `tojo`, we can read the creds for verification:
+```bash
+vault read database/creds/preserve-role
+```
+![read-creds](images/read-creds.png)

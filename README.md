@@ -28,3 +28,8 @@ For vagrant, we need vmware's plugin.
 ```bash
 vagrant plugin install vagrant-vmware-desktop
 ```
+### ANSIBLE
+All the dependencies for ansible are liste inside requirement.yml, just execute the following command:
+```bash
+ansible-galaxy collection install -r requirements.yml
+``` 

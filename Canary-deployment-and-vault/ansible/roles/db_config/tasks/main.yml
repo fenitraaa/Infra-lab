@@ -75,8 +75,27 @@
     - { key: ssl_key_file, value: "'/etc/postgresql/tls/vault.key'" }
   become: true
 
+- name: Configure listen_addresses
+  ansible.builtin.lineinfile:
+    path: /etc/postgresql/15/main/postgresql.conf
+    regexp: "^#?listen_addresses"
+    line: "listen_addresses = '*'"
+  become: true
+
+- name: Allow all ip inside the network in pg_hba.conf
+  ansible.builtin.lineinfile:
+    path: /etc/postgresql/15/main/pg_hba.conf
+    line: "hostssl preserve vault_admin 192.168.10.0/24 scram-sha-256"
+  become: true
+
 - name: Restart PostgreSQL
   ansible.builtin.systemd:
     name: postgresql
     state: restarted
+  become: true
+
+- name: Reload PostgreSQL
+  ansible.builtin.systemd:
+    name: postgresql@15-main
+    state: reloaded
   become: true

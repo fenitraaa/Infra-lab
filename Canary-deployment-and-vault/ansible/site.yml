@@ -35,3 +35,17 @@
   tags: tls_apply
   roles:
     - role: tls_apply_vault
+
+- name: Enable database engine for vault
+  hosts: vault-1
+  become: true
+  tags: database_engine
+  roles:
+    - role: database_engine_config
+
+- name: Install k3s
+  hosts: k3s-lab
+  become: true
+  tags: k3s_config
+  roles:
+    - role: k3s_config

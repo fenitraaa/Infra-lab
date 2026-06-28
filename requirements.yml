@@ -1,0 +1,5 @@
+collections:
+  - name: kubernetes.core
+    version: ">=2.4.0"
+  - name: community.postgresql
+    version: ">=3.0.0"
