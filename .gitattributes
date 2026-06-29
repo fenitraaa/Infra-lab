@@ -1,1 +1,4 @@
 *.png binary
+* text=auto
+*.gan text eol=lf
+*.drawio text eol=lf
