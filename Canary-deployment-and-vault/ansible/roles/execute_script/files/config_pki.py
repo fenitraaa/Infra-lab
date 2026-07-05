@@ -4,9 +4,11 @@ import os
 
 server_issue_cert = {
     "vault-1": "192.168.10.11",
-    "db": "192.168.10.10",
+    "db-lab": "192.168.10.10",
     "vault-2": "192.168.10.12",
-    "k3s": "192.168.10.30" }
+    "k3s-lab": "192.168.10.30",
+    "haproxy": "192.168.10.20"
+    }
 
 def login():
     client = hvac.Client(
@@ -126,7 +128,7 @@ def create_role(client):
     client.secrets.pki.create_or_update_role(
         name="lab-server",
         extra_params={
-            "allowed_domains": "vault-1,vault-2,db,k3s",
+            "allowed_domains": "vault-1,vault-2,db-lab,k3s-lab,haproxy",
             "allow_bare_domains": True,
             "allow_ip_sans": True,
             "max_ttl": "8760h",
@@ -139,11 +141,14 @@ def generate_cert_servers(client):
     certificates = {}
     for server, ip in server_issue_cert.items():
         if server_actif(server):
+            ip_sans = ip
+            if server in ["vault-1", "vault-2"]:
+                ip_sans = f"{ip},192.168.10.20"
             response = client.secrets.pki.generate_certificate(
                 name="lab-server",
                 common_name=server,
                 extra_params={
-                    "ip_sans": ip,
+                    "ip_sans": ip_sans,
                     "ttl": "8760h"
                 },
                 mount_point="pki_int"

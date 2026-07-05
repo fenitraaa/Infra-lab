@@ -1,0 +1,214 @@
+---
+- name: Install python dependencies
+  ansible.builtin.apt:
+    name:
+      - python3-yaml
+      - python3-pip
+    state: present
+
+- name: Install kubernetes python library
+  ansible.builtin.shell: |
+    pip3 install kubernetes --break-system-packages
+  become: true
+  changed_when: false
+
+- name: Download k3s install script
+  ansible.builtin.get_url:
+    url: https://get.k3s.io
+    dest: /tmp/k3s_install.sh
+    mode: '0755'
+
+- name: Install k3s
+  ansible.builtin.shell: |
+    set -o pipefail
+    /tmp/k3s_install.sh
+  args:
+    creates: /usr/local/bin/k3s
+    executable: /bin/bash
+
+- name: Wait for k3s to be ready
+  ansible.builtin.wait_for:
+    path: /etc/rancher/k3s/k3s.yaml
+    timeout: 60
+
+- name: Get kubeconfig
+  ansible.builtin.fetch:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: ./kubeconfig.yaml
+    flat: true
+
+- name: Add kubeconfig mode to ExecStart
+  ansible.builtin.replace:
+    path: /etc/systemd/system/k3s.service
+    regexp: '^ExecStart=/usr/local/bin/k3s$'
+    replace: 'ExecStart=/usr/local/bin/k3s server --write-kubeconfig-mode 644'
+  notify: restart k3s
+
+- name: Download helm install script
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+    dest: /tmp/get-helm-3.sh
+    mode: '0755'
+
+- name: Install helm
+  ansible.builtin.command: /tmp/get-helm-3.sh
+  args:
+    creates: /usr/local/bin/helm
+
+- name: Set KUBECONFIG for all tasks
+  ansible.builtin.lineinfile:
+    path: /etc/environment
+    line: 'KUBECONFIG=/etc/rancher/k3s/k3s.yaml'
+    state: present
+
+- name: Check if HashiCorp helm repo exists
+  ansible.builtin.command: helm repo list
+  register: helm_repos
+  changed_when: false
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+
+- name: Add HashiCorp helm repo
+  ansible.builtin.command: helm repo add hashicorp https://helm.releases.hashicorp.com
+  when: "'hashicorp' not in helm_repos.stdout"
+  changed_when: "'hashicorp' not in helm_repos.stdout"
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+
+- name: Update helm repos
+  ansible.builtin.command: helm repo update
+  when: "'hashicorp' not in helm_repos.stdout"
+  changed_when: "'hashicorp' not in helm_repos.stdout"
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+
+- name: Install Vault Secrets Operator
+  ansible.builtin.shell: |
+    helm upgrade -i vault-secrets-operator hashicorp/vault-secrets-operator \
+      --namespace vault-secrets-operator-system \
+      --create-namespace
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+  args:
+    creates: /etc/rancher/k3s/k3s.yaml
+
+- name: Wait for VSO to be ready
+  ansible.builtin.command: >
+    kubectl wait --for=condition=ready pod \
+      -l app.kubernetes.io/name=vault-secrets-operator \
+      -n vault-secrets-operator-system \
+      --timeout=300s
+  changed_when: false
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+
+- name: Create prod namespace
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: prod
+
+- name: Create ServiceAccount for preserve-api
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    definition:
+      apiVersion: v1
+      kind: ServiceAccount
+      metadata:
+        name: preserve-api
+        namespace: prod
+
+- name: Create devops ClusterRole
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRole
+      metadata:
+        name: devops-role
+      rules:
+        - apiGroups: [""]
+          resources: ["pods", "services", "configmaps", "secrets", "namespaces", "nodes", "serviceaccounts"]
+          verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+        - apiGroups: ["apps"]
+          resources: ["deployments", "replicasets", "daemonsets", "statefulsets"]
+          verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+        - apiGroups: ["networking.k8s.io"]
+          resources: ["ingresses"]
+          verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+        - apiGroups: ["rbac.authorization.k8s.io"]
+          resources: ["roles", "rolebindings", "clusterroles", "clusterrolebindings"]
+          verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+        - apiGroups: ["apiextensions.k8s.io"]
+          resources: ["customresourcedefinitions"]
+          verbs: ["get", "list", "watch"]
+
+- name: Create devops ClusterRoleBinding
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: devops-rolebinding
+      subjects:
+        - kind: User
+          name: tojo
+          apiGroup: rbac.authorization.k8s.io
+      roleRef:
+        kind: ClusterRole
+        name: devops-role
+        apiGroup: rbac.authorization.k8s.io
+
+- name: Create ServiceAccount token for preserve-api
+  ansible.builtin.shell: |
+    kubectl create token preserve-api -n prod --duration=8760h
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+  register: sa_token
+  changed_when: false
+
+- name: Copy k3s CA cert locally
+  ansible.builtin.fetch:
+    src: /var/lib/rancher/k3s/server/tls/server-ca.crt
+    dest: /tmp/k3s-ca.crt
+    flat: true
+
+- name: Save SA token locally
+  ansible.builtin.copy:
+    content: "{{ sa_token.stdout }}"
+    dest: /tmp/k3s-sa-token.txt
+    mode: '0600'
+  delegate_to: localhost
+
+- name: Add TLS SAN to k3s service
+  ansible.builtin.replace:
+    path: /etc/systemd/system/k3s.service
+    regexp: '^ExecStart=/usr/local/bin/k3s server --write-kubeconfig-mode 644$'
+    replace: 'ExecStart=/usr/local/bin/k3s server --write-kubeconfig-mode 644 --tls-san 192.168.10.30'
+  notify: restart k3s
+
+- name: Create vault token reviewer ClusterRoleBinding
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    definition:
+      apiVersion: rbac.authorization.k8s.io/v1
+      kind: ClusterRoleBinding
+      metadata:
+        name: vault-token-reviewer
+      subjects:
+        - kind: ServiceAccount
+          name: preserve-api
+          namespace: prod
+      roleRef:
+        kind: ClusterRole
+        name: system:auth-delegator
+        apiGroup: rbac.authorization.k8s.io

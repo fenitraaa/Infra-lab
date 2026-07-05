@@ -49,3 +49,17 @@
   tags: k3s_config
   roles:
     - role: k3s_config
+
+- name: Enable Kubernetes engine for vault
+  hosts: vault-1
+  become: true
+  tags: kubernetes_engine
+  roles:
+    - role: kubernetes_engine
+
+- name: Configure VSO
+  hosts: k3s-lab
+  become: true
+  tags: vso_config
+  roles:
+    - role: vso_config

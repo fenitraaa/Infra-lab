@@ -1,15 +1,25 @@
 # CANARY DEPLOYMENT AND VAULT
 
-This project try to simulate an infrastructure like production ready, so all the user are supose to be real.
+## ARCHITECTURE
+
+Within an Enterprise environment, all credentials are sometimes less secure, they are hidden inside `.env` file or inside Kubernetes `Secret` objects. That's why HashiCorp invented `VAULT` to organize and protect all credentials. This project tries to simulate an infrastructure like production ready for this purpose, but with the addition of the `Canary` deployment methode inside a Kubernetes cluster(k3s).
+
+![diagram](canary-vault-diagram.png)
+
+It also containd a pratical exercise for our academic courses on `Project management`, and here is the `Gantt` diagram for that:
+
+![gantt](canary-vault.png) 
+
+All the users inside the cluster are supose to be real.
 
 | USER | GROUP | DESCRIPTION |
 | ---- | ---- | ---- |
-| Ansible | ansible, root | service account for ansible-playbook client |
-| Fenitra | admin, root | account for system administrator |
-| Tojo | devops, adm | account for devops engineer with limited autorisation |
+| Ansible | ansible, root | service account for the ansible-playbook client |
+| Fenitra | admin, root | account for the system administrator |
+| Tojo | devops, adm | account for the DevOps engineer with limited authorization  |
 
-### CONFIGURATION FOR HOST
-Inside the host, we should create key ssh for all user account and copy in `$HOME/.ssh/config` file.
+### HOST CONFIGURATION
+Inside the host, we should create key ssh for all user account and copy it into the `$HOME/.ssh/config` file.
 
 ```bash
 cd /script
@@ -185,3 +195,32 @@ If we connect in vault-1 server using the devops user `tojo`, we can read the cr
 vault read database/creds/preserve-role
 ```
 ![read-creds](images/read-creds.png)
+
+### K3S CLUSTER & K8S AUTH ENGINE CONFIGURATION
+
+As usual, the configuration for k3s is done using ansible playbook, by executing the following command:
+
+```bash
+ansible-playbook -i inventory.yml site.yml --tags k3s_config --limit k3s --ask-vault-pass
+```
+![k3s-conf](images/k3s-config.png)
+
+So our `k3s-lab` server has k3s and Helm installed successfully. However, we should activate the `Kubernetes auth` engine inside the `vault` cluster and execute the python script `kubernetes_auth.py` which automate all the necessary configuration for this engine.
+
+```bash
+ansible-playbook -i inventory.yml site.yml --tags kubernetes_engine --limit vault-1 --ask-vault-pass
+```
+![kubernetes-auth](images/kubernetes-engine.png)
+
+And then let's go back to our `k3s` server to configure the `Vault Secrets Operator` which injects automatically all credentials into our deployment.
+
+```bash
+ansible-playbook -i inventory.yml site.yml --tags vso_config --limit k3s --ask-vault-pass
+```
+![vso-config](images/vso-config.png)
+
+Verification inside the `vault-1` server:
+
+![vault-verification](images/vault1-k3s-verification.png)
+
+Right now, our `k3s` server can retrieve the username and password from `vault` cluster !!!

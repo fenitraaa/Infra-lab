@@ -1,0 +1,30 @@
+---
+- name: Copy kubernetes_auth.py to vault-1
+  ansible.builtin.copy:
+    src: kubernetes_auth.py
+    dest: /opt/vault-pki/
+    mode: "0755"
+  changed_when: false
+
+- name: Copy k3s CA cert to vault-1
+  ansible.builtin.copy:
+    src: /tmp/k3s-ca.crt
+    dest: /opt/vault-pki/k3s-ca.crt
+    mode: "0644"
+
+- name: Copy SA token to vault-1
+  ansible.builtin.copy:
+    src: /tmp/k3s-sa-token.txt
+    dest: /opt/vault-pki/k3s-sa-token.txt
+    mode: "0644"
+
+- name: Run kubernetes_auth.py
+  ansible.builtin.command:
+    cmd: /opt/vault-pki/env-infra/bin/python3 /opt/vault-pki/kubernetes_auth.py
+  environment:
+    VAULT_ADDR: "https://192.168.10.11:8200"
+    VAULT_TOKEN: "{{ vault_token }}"
+    VAULT_CACERT: "/usr/local/share/ca-certificates/vault-chain.crt"
+    K3S_CA_CERT: "/opt/vault-pki/k3s-ca.crt"
+    K3S_SA_TOKEN: "/opt/vault-pki/k3s-sa-token.txt"
+  changed_when: false

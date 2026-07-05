@@ -1,0 +1,69 @@
+---
+- name: Read Vault CA cert from k3s-lab
+  ansible.builtin.slurp:
+    src: /usr/local/share/ca-certificates/vault-chain.crt
+  register: vault_ca_cert
+
+- name: Create Vault CA secret
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: vault-ca-secret
+        namespace: prod
+      type: Opaque
+      data:
+        ca.crt: "{{ vault_ca_cert.content }}"
+
+- name: Create VaultConnection
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    definition:
+      apiVersion: secrets.hashicorp.com/v1beta1
+      kind: VaultConnection
+      metadata:
+        name: vault-connection
+        namespace: prod
+      spec:
+        address: https://192.168.10.20:8200
+        caCertSecretRef: vault-ca-secret
+
+- name: Create VaultAuth
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    definition:
+      apiVersion: secrets.hashicorp.com/v1beta1
+      kind: VaultAuth
+      metadata:
+        name: vault-auth
+        namespace: prod
+      spec:
+        method: kubernetes
+        mount: kubernetes
+        kubernetes:
+          role: preserve-role
+          serviceAccount: preserve-api
+        vaultConnectionRef: vault-connection
+
+- name: Create VaultDynamicSecret
+  kubernetes.core.k8s:
+    state: present
+    kubeconfig: /etc/rancher/k3s/k3s.yaml
+    definition:
+      apiVersion: secrets.hashicorp.com/v1beta1
+      kind: VaultDynamicSecret
+      metadata:
+        name: preserve-db-creds
+        namespace: prod
+      spec:
+        vaultAuthRef: vault-auth
+        mount: database
+        path: creds/preserve-role
+        destination:
+          name: preserve-db-secret
+          create: true

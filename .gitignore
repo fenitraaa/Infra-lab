@@ -15,3 +15,6 @@ env-infra/
 __pycache__
 .pytest_cache
 *.kdbx
+*.swp
+*.swo
+*.bkp
