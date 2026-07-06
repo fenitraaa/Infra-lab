@@ -4,22 +4,7 @@ It's part of my intership project with complete Continuous Integration and Deplo
 
 ### Pipeline Flow
 
-```
-GitHub Push
-    │
-    ▼
-Jenkins (master)
-    │  triggers
-    ▼
-Ephemeral K8s Agent Pod
-    ├── Container: jnlp          → Jenkins communication
-    ├── Container: node-linter   → npm ci, npm run build
-    ├── Container: docker-cli    → docker build & push → GHCR
-    └── Container: kubectl       → kubectl set image → namespace dev
-    │
-    ▼
-Email Notification (success / failure)
-```
+![diagram](Jenkins.drawio.png)
 
 
 ## Project Architecture

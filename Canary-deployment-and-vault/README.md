@@ -22,9 +22,8 @@ All the users inside the cluster are supose to be real.
 Inside the host, we should create key ssh for all user account and copy it into the `$HOME/.ssh/config` file.
 
 ```bash
-cd /script
-chmod +x key-gen.sh
-./key-gen.sh
+chmod +x script/key-gen.sh
+./script/key-gen.sh
 ```
 
 And then we can create our servers using vagrant. Inside this vagrantfile, there's a script `config-server.py` that config automatically all user account for all existing servers.
@@ -119,9 +118,8 @@ HAproxy tell us the truth inside his UI:
 
 Or you can use the script inside `script/check-health.sh`.
 ```bash
-cd /script
-chmod +x check-health.sh
-./check-health.sh
+chmod +x script/check-health.sh
+./script/check-health.sh
 ```
 ![health-check](images/health-check.png)
 
