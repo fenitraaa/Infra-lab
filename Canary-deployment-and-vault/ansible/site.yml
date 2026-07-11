@@ -63,3 +63,10 @@
   tags: vso_config
   roles:
     - role: vso_config
+
+- name: Deploy preserve-api
+  hosts: k3s-lab
+  become: true
+  tags: preserve_api_deploy
+  roles:
+    - role: preserve_api_deploy

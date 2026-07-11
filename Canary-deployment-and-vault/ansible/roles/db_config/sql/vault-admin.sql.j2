@@ -19,3 +19,12 @@ GRANT SELECT, INSERT, UPDATE, DELETE
 GRANT USAGE, SELECT 
   ON SEQUENCE public.reserver_idreserv_seq
   TO vault_admin WITH GRANT OPTION;
+
+GRANT CREATE ON SCHEMA public TO vault_admin;
+ALTER TABLE public.client OWNER TO vault_admin;
+ALTER TABLE public.voiture OWNER TO vault_admin;
+ALTER TABLE public.place OWNER TO vault_admin;
+ALTER TABLE public.reserver OWNER TO vault_admin;
+ALTER TABLE public.flyway_schema_history OWNER TO vault_admin;
+ALTER SEQUENCE public.reserver_idreserv_seq OWNER TO vault_admin;
+

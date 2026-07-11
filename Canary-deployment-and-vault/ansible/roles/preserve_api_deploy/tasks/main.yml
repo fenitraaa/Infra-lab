@@ -1,0 +1,13 @@
+---
+- name: Copy preserve-api chart to k3s-lab
+  ansible.builtin.copy:
+    src: preserve-api-chart/
+    dest: /tmp/preserve-api-chart/
+    mode: "0755"
+
+- name: Deploy preserve-api with Helm
+  ansible.builtin.command:
+    cmd: helm upgrade --install preserve-api /tmp/preserve-api-chart --namespace prod
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+  changed_when: false

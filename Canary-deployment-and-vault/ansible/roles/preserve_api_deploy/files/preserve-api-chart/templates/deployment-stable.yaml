@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: preserve-api-stable
+spec:
+  replicas: {{ .Values.stable.replicaCount }}
+  selector:
+    matchLabels:
+      app: preserve-api
+      version: stable
+  template:
+    metadata:
+      labels:
+        app: preserve-api
+        version: stable
+    spec:
+      serviceAccountName: preserve-api
+      containers:
+      - name: preserve-api
+        image: {{ .Values.stable.image.repository }}:{{ .Values.stable.image.tag }}
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_URL
+          value: "jdbc:postgresql://{{ .Values.db.host }}:{{ .Values.db.port }}/{{ .Values.db.name }}"
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: preserve-db-secret
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: preserve-db-secret
+              key: password

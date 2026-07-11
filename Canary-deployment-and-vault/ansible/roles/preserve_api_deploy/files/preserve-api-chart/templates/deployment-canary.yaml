@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: preserve-api-canary
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.canary.replicaCount }}
+  selector:
+    matchLabels:
+      app: preserve-api
+      version: canary
+  template:
+    metadata:
+      labels:
+        app: preserve-api
+        version: canary
+    spec:
+      serviceAccountName: preserve-api
+      containers:
+      - name: preserve-api
+        image: {{ .Values.canary.image.repository }}:{{ .Values.canary.image.tag }}
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_URL
+          value: "jdbc:postgresql://{{ .Values.db.host }}:{{ .Values.db.port }}/{{ .Values.db.name }}"
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: preserve-db-secret
+              key: username
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: preserve-db-secret
+              key: password

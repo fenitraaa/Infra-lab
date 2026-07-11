@@ -1,14 +1,27 @@
 # CANARY DEPLOYMENT AND VAULT
 
-## ARCHITECTURE
-
 Within an Enterprise environment, all credentials are sometimes less secure, they are hidden inside `.env` file or inside Kubernetes `Secret` objects. That's why HashiCorp invented `VAULT` to organize and protect all credentials. This project tries to simulate an infrastructure like production ready for this purpose, but with the addition of the `Canary` deployment methode inside a Kubernetes cluster(k3s).
 
-![diagram](canary-vault-diagram.png)
+There's a REST API project that I built with Spring Boot named PReserve, with two versions: [V1](https://github.com/fenitraaa/PReserve-api/tree/main) and [V2](https://github.com/fenitraaa/PReserve-api/tree/feature/v2). The only differencies between the two versions is that V2 contain a `x-app-version: v2` header. This API will be deployed inside the k3s cluster using the canary method.
 
 It also containd a pratical exercise for our academic courses on `Project management`, and here is the `Gantt` diagram for that:
 
-![gantt](canary-vault.png) 
+![gantt](canary-vault.png)
+
+### TABLE OF CONTENTS
+- [ARCHITECTURE](#architecture)
+- [HOST CONFIGURATION](#host-configuration)
+- [VAULT CLUSTER CONFIGURATION](#vault-cluster-configuration)
+- [PKI CONFIGURATION](#pki-configuration)
+- [DATABASE CONFIGURATION](#database-configuration)
+- [CREDENTIALS AUTO ROTATION CONFIGURATION](#credentials-auto-rotation-configuration)
+- [K3S CLUSTER & K8S AUTH ENGINE CONFIGURATION](#k3s-cluster--k8s-auth-engine-configuration)
+- [DEPLOYING HELM CHART](#deploying-helm-chart)
+
+### ARCHITECTURE
+
+![diagram](canary-vault-diagram.png)
+ 
 
 All the users inside the cluster are supose to be real.
 
@@ -222,3 +235,21 @@ Verification inside the `vault-1` server:
 ![vault-verification](images/vault1-k3s-verification.png)
 
 Right now, our `k3s` server can retrieve the username and password from `vault` cluster !!!
+
+### DEPLOYING HELM CHART
+
+The `PReserve-api` application will be deployed inside the `k3s` cluster using a custom Helm chart located at `roles/preserve_api_deploy/files/preserve-api-chart`. This chart manages both the `v1` and `v2` deployments, along with the Traefik `IngressRoute` used for canary routing between the two versions. The following commands do that:
+
+```bash
+ansible-playbook -i inventory.yml site.yml --tags preserve_api_deploy --ask-vault-pass
+```
+
+![preserve-deploy](images/preserve-deploy.png)
+
+So we have two versions exposed, with 75% of traffic going to V1 and 25% to V2:
+```bash
+for i in {1..100}; do curl -sI https://k3s-lab/actuator/health | grep -i "x-app-version" || echo "V1"; done | sort | uniq -c
+```
+![test](images/test-canary.png)
+
+This confirms that the canary deployment is working as expected, with traffic being split between `V1` and `V2` according to the configured weights. In addition, credentials used by the application are dynamically rotated by `Vault` every hour, ensuring that no static or long-lived secrets are stored inside the cluster.

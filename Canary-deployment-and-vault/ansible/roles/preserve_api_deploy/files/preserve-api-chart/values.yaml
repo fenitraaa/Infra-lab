@@ -1,0 +1,18 @@
+stable:
+  image:
+    repository: ghcr.io/fenitraaa/preserve-api
+    tag: latest
+  replicaCount: 1
+  weight: 75
+
+canary:
+  image:
+    repository: ghcr.io/fenitraaa/preserve-api
+    tag: v2
+  replicaCount: 2
+  weight: 25
+
+db:
+  host: 192.168.10.10
+  port: 5432
+  name: preserve

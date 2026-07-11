@@ -18,3 +18,5 @@ __pycache__
 *.swp
 *.swo
 *.bkp
+*.yaml$
+*.tpl

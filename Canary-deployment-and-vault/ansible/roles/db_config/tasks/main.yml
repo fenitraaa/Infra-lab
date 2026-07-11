@@ -85,7 +85,7 @@
 - name: Allow all ip inside the network in pg_hba.conf
   ansible.builtin.lineinfile:
     path: /etc/postgresql/15/main/pg_hba.conf
-    line: "hostssl preserve vault_admin 192.168.10.0/24 scram-sha-256"
+    line: "hostssl preserve all 192.168.10.0/24 scram-sha-256"
   become: true
 
 - name: Restart PostgreSQL
