@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="UTF-8"?><project name="Untitled Gantt Project" company="" webLink="http://" view-date="2026-05-28" view-index="0" gantt-divider-location="617" resource-divider-location="300" version="3.3.3311" locale="fr_FR">
+<?xml version="1.0" encoding="UTF-8"?><project name="Untitled Gantt Project" company="" webLink="http://" view-date="2026-05-31" view-index="0" gantt-divider-location="617" resource-divider-location="300" version="3.3.3311" locale="fr_FR">
     <description/>
     <view zooming-state="default:3" id="gantt-chart">
         <field id="tpd3" name="Nom" width="352" order="0"/>
@@ -41,7 +41,8 @@
         <task id="0" uid="e1c8cc9cba7b4540a180ae547dee39a4" name="Reading vault's documentation book" meeting="false" start="2026-05-31" duration="8" complete="0" expand="true"/>
         <task id="1" uid="0fac487ca16a426fb3a50cc3fab863de" name="Hardening all servers" meeting="false" start="2026-06-09" duration="5" complete="0" expand="true"/>
         <task id="2" uid="acae39bdc4f94dc8845650d6378ecb30" name="Configuring vault cluster  and reading helm's book" meeting="false" start="2026-06-15" duration="9" complete="0" expand="true"/>
-        <task id="3" uid="bfc54fe53c334833ab2f4496e3e56853" name="Configuring database and k3s server" meeting="false" start="2026-06-25" duration="7" complete="0" expand="true"/>
+        <task id="3" uid="bfc54fe53c334833ab2f4496e3e56853" name="Doing some side academic projects and exams" meeting="false" start="2026-06-25" duration="8" complete="0" expand="true"/>
+        <task id="4" uid="659104eb054346ca87daea00d48a32fd" name="Configuring database and k3s server" meeting="false" start="2026-07-04" duration="8" complete="0" expand="true"/>
     </tasks>
     <resources/>
     <allocations/>
