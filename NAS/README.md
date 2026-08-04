@@ -28,7 +28,7 @@ You can access all VMs using ssh
 ```
 vagrant ssh ldap
 vagrant ssh nas
-vagrant ssh backup
+vagrant ssh client
 ```
 Verify if all disk are recognized by nas server
 
@@ -64,7 +64,7 @@ ansible-playbook site.yml --ask-vault-pass --tags openldap
 
 
 Execute the scipt to automate ldif configurations
-``` 
+```
 cd /vagrant/ldap
 chmod +x ./ldapadd_script.sh
 ./ldapadd_script.sh
@@ -109,7 +109,7 @@ Next, we create an ext4 filesystem on the array and mount it at `/srv/shares`. A
 
 ![mkfs.ext4](screenshot/mkfs-ext4.png)
 
-> 6G because of the rule of RAID 5: (N-1) x size of smallest disk.  
+> 6G because of the rule of RAID 5: (N-1) x size of smallest disk.
 
 To save all configurations that we made, we should write the array definition, and it's `UUID` to `/etc/mdadm/mdadm.conf`. Then, update initramfs so it doesn't reflect the old configuration.
 
@@ -178,7 +178,7 @@ PrivateKey = <windows_private_key>
 [Peer]
 PublicKey  = <linux_public_key>
 Endpoint   = <VPN_server_IP>:51820
-AllowedIPs = 192.168.10.0/24     
+AllowedIPs = 192.168.10.0/24
 PersistentKeepalive = 25
 ```
 ![wg-config](screenshot/wireguard-config.jpeg)

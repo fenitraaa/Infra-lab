@@ -26,7 +26,7 @@ Vagrant.configure("2") do |config|
       config.vm.provision "shell", inline: <<-SHELL
          apt-get update -y
       SHELL
-      end
+   end
 
    config.vm.define "ldap" do |ldap|
       ldap.vm.hostname = "ldap.local"
@@ -39,6 +39,20 @@ Vagrant.configure("2") do |config|
       config.vm.provision "shell", inline: <<-SHELL
       apt-get update -y
       apt-get install -y debconf-utils
+      SHELL
+   end
+
+   config.vm.define "client" do |client|
+      client.vm.hostname = "client.local"
+      client.vm.network "private_network", ip: "192.168.10.30"
+      client.vm.provider "vmware_desktop" do |vmware|
+         vmware.gui = ENV['VAGRANT_GUI'] == 'true'
+         vmware.memory = 512
+         vmware.linked_clone = false
+      end
+      config.vm.provision "shell", inline: <<-SHELL
+         apt-get update -y
+         apt-get install -y smbclient
       SHELL
    end
 end
