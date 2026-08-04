@@ -41,3 +41,11 @@
   roles:
     - role: nas_samba
       tags: nas_samba
+
+- name: Configure node_exporter and smart monitoring sur on the NAS
+  hosts: nas
+  become: true
+  tags: monitoring
+  gather_facts: false
+  roles:
+    - config_monitoring

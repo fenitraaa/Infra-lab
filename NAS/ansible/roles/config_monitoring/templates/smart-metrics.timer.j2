@@ -1,0 +1,10 @@
+[Unit]
+Description=launch smart-metrics every hour
+
+[Timer]
+OnCalendar=hourly
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+

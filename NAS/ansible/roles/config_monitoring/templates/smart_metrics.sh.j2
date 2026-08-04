@@ -1,0 +1,15 @@
+#!/bin/bash
+
+output="/var/lib/node_exporter/textfile_collector/smart.prom"
+tmp="${output}.tmp"
+
+echo "# HELP smart_reallocated_sectors Number of sectors reallocated" > "$tmp"
+echo "# TYPE smart_reallocated_sectors gauge" >> "$tmp"
+
+for disk in /dev/sdd /dev/sdb /dev/sdc; do
+    value=$(/usr/sbin/smartctl -A "$disk" "$disk" 2>/dev/null | awk '/Reallocated_Sector_Ct/ {print $10}')
+    echo "smart_reallocated_sectors{device=\"$disk\"} ${value:-0}" >> "$tmp"
+done
+
+mv "$tmp" "$output"
+
