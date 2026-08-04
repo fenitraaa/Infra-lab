@@ -1,3 +1,4 @@
+---
 - name: Install Openldap and generate certificates
   hosts: ldap
   become: true
@@ -49,3 +50,12 @@
   gather_facts: false
   roles:
     - config_monitoring
+
+- name: Configure client server
+  hosts: client
+  become: true
+  tags: client_rsync
+  gather_facts: false
+  roles:
+    - client_rsync_config
+

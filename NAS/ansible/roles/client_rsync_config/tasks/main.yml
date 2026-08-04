@@ -1,0 +1,57 @@
+---
+- name: Create linuxuser account
+  ansible.builtin.user:
+    name: linuxuser
+    shell: /bin/bash
+    create_home: true
+    state: present
+
+- name: Create NAS source directory
+  ansible.builtin.file:
+    path: /home/linuxuser/NAS
+    state: directory
+    owner: linuxuser
+    group: linuxuser
+    mode: "0755"
+
+- name: Install cifs-utils
+  ansible.builtin.apt:
+    name: cifs-utils
+    state: present
+    update_cache: true
+
+- name: Create mount point directory
+  ansible.builtin.file:
+    path: /mnt/linuxuser
+    state: directory
+    owner: linuxuser
+    group: linuxuser
+    mode: "0700"
+
+- name: Deploy CIFS credentials file
+  ansible.builtin.copy:
+    content: |
+      username=linuxuser
+      password={{ vault_linuxuser_password }}
+    dest: /etc/samba/credentials-linuxuser
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Mount CIFS share persistently
+  ansible.posix.mount:
+    path: /mnt/linuxuser
+    src: "//192.168.10.10/linuxuser"
+    fstype: cifs
+    opts: "credentials=/etc/samba/credentials-linuxuser,uid=linuxuser,gid=linuxuser,_netdev,vers=3.0"
+    state: mounted
+
+- name: Create rsync cron job
+  ansible.builtin.cron:
+    name: "Sync NAS to linuxuser share"
+    minute: "0"
+    hour: "*"
+    user: linuxuser
+    job: "/usr/bin/rsync -avz /home/linuxuser/NAS/ /mnt/linuxuser/ >> /home/linuxuser/rsync.log 2>&1"
+
