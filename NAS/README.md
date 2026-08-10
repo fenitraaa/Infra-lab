@@ -123,9 +123,9 @@ It will not mount automatically our new filesystem at boot, so entry `nofail` at
 
 ![nofail](screenshot/nofails.png)
 
-## Test from linux client (HOST)
+## Test from linux client
 
-For test, we use `smbclient` like tools to interact with NAS server at `//192.168.10.10/public` that all user can access. And we create `test` directory.
+For test, we use `smbclient` like tools to interact with NAS server at `//192.168.10.10/public` that all user can access. And we create `test` directory to test the authorization, then it returns error `NT_STATUS_ACCESS_DENIED`. That prove the read only authorization for all users except the administrator.
 
 ![test-linux](screenshot/mkdir-test.png)
 
@@ -133,6 +133,9 @@ If we list all directories at `/srv/shares/public` from NAS server, the `test` d
 
 ![ls-test](screenshot/ls-la-test.png)
 
+But the user have a reserved personal dirctory inside the NAS server, located at `/srv/shares/secure/linuxuser` which he can create his own data.
+
+![!linux-only](screenshot/mkdir-linux-only.png)
 ## VPN site-to-site configuration
 
 For VPN server, we use [wireguard](https://www.wireguard.com/install/) and configure it from HOST and windows client.
