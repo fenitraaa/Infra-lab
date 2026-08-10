@@ -1,4 +1,4 @@
-# CANARY DEPLOYMENT AND VAULT
+# CANARY DEPLOYMENT AND VAULT (PROD-READY)
 
 Within an Enterprise environment, all credentials are sometimes less secure, they are hidden inside `.env` file or inside Kubernetes `Secret` objects. That's why HashiCorp invented `VAULT` to organize and protect all credentials. This project tries to simulate an infrastructure like production ready for this purpose, but with the addition of the `Canary` deployment methode inside a Kubernetes cluster(k3s).
 
