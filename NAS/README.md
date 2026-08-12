@@ -214,3 +214,15 @@ ansible-playbook site.yml --ask-vault-pass --tags client_rsync
 
 And then we can connecte inside the server using the user `linuxuser` and verify if the configuration is configured correctly.
 ![crontab](screenshot/crontab-l.png)
+
+## Monitoring
+
+It's the last part of this project but the most important. As Sys admin, the `monitoring` is like a habit, and it's not depends on which tools you use.
+For our project, we use the popular and combinated tools if we talk about monitoring: `Prometheus` and `Grafana`. Those tools fectch only the standart collector, but we need to monitor all disks so using the `smartmontools` is the best choice.
+Then, we need also to create personalized service using `systemd`. The following commands do all of those requirements:
+
+```bash
+ansible-playbook site.yml --ask-vault-pass --tags monitoring
+```
+![monitoring](screenshot/tags-monitoring.png)
+
