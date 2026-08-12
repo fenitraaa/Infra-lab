@@ -202,3 +202,15 @@ net use Z: \\192.168.10.10\public /user:windowsuser *
 Finally, we can use Windows explorer for best view XD.
 
 ![windows-disks](screenshot/windows-disks.jpeg)
+
+## Rsync configuration
+
+Previously, we talk about client `Windows` interaction with our NAS server, but the demos gives a brief overview of client `linux`. So the automatic synchronisation is inside the client linux using `rsync`. As usual, we use ansible to simplify the server configuration:
+
+```bash
+ansible-playbook site.yml --ask-vault-pass --tags client_rsync
+```
+![rsync](screenshot/client-rsync.png)
+
+And then we can connecte inside the server using the user `linuxuser` and verify if the configuration is configured correctly.
+![crontab](screenshot/crontab-l.png)
