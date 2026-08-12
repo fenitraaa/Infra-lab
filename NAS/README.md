@@ -248,3 +248,10 @@ And check the target inside the `Prometheus` should follow our NAS server and pr
 
 We can execute our personalized `PromQL` query: ***smart_reallocated_sectors***
 ![prometheus-query](screenshot/prometheus-query.png)
+
+For `Grafana` configuration, we need to specify the Prometheus as `Data sources`.
+![data-sources](screenshot/grafana-data-source.png)
+
+Finally, We had our three disks inside `Grafana` dashboard.
+![grafana-dashboard](screenshot/grafana-dashboard.png)
+>> All the metrics are 0 because smartmontools cannot monitor virtual disks, but the project is only for educational purpose.
