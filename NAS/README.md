@@ -236,3 +236,15 @@ And then, we had two new services inside the NAS server:
 
 And we can check our personalized `.prom` file which complies with the standard of `Metric Types` including the `HELP` and `TYPE`:
 ![cat_prom](screenshot/cat-smart-prom.png)
+
+So we can use our personalized `PromQL`. But above all, we should create our `Prometheus` and `Grafana` services using `Docker` container with the `compose.yaml` file.
+
+```bash
+docker compose up -d
+```
+And check the target inside the `Prometheus` should follow our NAS server and prometheus itself.
+
+![prometheus-target](screenshot/prometheus-target.png)
+
+We can execute our personalized `PromQL` query: ***smart_reallocated_sectors***
+![prometheus-query](screenshot/prometheus-query.png)
