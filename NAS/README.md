@@ -226,3 +226,13 @@ ansible-playbook site.yml --ask-vault-pass --tags monitoring
 ```
 ![monitoring](screenshot/tags-monitoring.png)
 
+And then, we had two new services inside the NAS server:
+
+***node_exporter***
+![node_exporter](screenshot/status-node-exporter.png)
+
+***smart-metrics.service***
+![smart](screenshot/status-smart-metrics-service.png)
+
+And we can check our personalized `.prom` file which complies with the standard of `Metric Types` including the `HELP` and `TYPE`:
+![cat_prom](screenshot/cat-smart-prom.png)
