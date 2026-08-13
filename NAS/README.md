@@ -239,6 +239,13 @@ And we can check our personalized `.prom` file which complies with the standard 
 
 So we can use our personalized `PromQL`. But above all, we should create our `Prometheus` and `Grafana` services using `Docker` container with the `compose.yaml` file.
 
+But before that, don't forget to set your `Grafana`'s admin password with creating your own `.env` file.
+
+```bash
+GRAFANA_ADMIN_PASSWORD=password_for_grafana
+```
+
+Launch all containers with the following command:
 ```bash
 docker compose up -d
 ```
