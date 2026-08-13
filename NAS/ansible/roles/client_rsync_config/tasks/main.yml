@@ -54,4 +54,3 @@
     hour: "*"
     user: linuxuser
     job: "/usr/bin/rsync -avz /home/linuxuser/NAS/ /mnt/linuxuser/ >> /home/linuxuser/rsync.log 2>&1"
-

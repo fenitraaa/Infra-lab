@@ -14,12 +14,13 @@ log level = 1
 
 [public]
 path = /srv/shares/public
-valid users = @linux @windows
-read only = no
+valid users = @linux @windows @admins
+read only = yes
+write list = @admins
 browseable = yes
 create mask = 0664
 directory mask = 0775
-dfree command  = /usr/local/bin/dfree
+dfree command = /usr/local/bin/dfree
 
 [linuxuser]
 path = /srv/shares/secure/linuxuser

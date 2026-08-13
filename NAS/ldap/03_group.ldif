@@ -8,7 +8,7 @@ dn: cn=admins,ou=group,dc=lab,dc=local
 objectClass: posixGroup
 cn: admins
 gidNumber: 10002
-memberUid: linuxuser
+memberUid: admin
 
 dn: cn=windows,ou=group,dc=lab,dc=local
 objectClass: posixGroup

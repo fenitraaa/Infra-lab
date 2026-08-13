@@ -1,3 +1,4 @@
+---
 - name: Install Samba, SSSD and ACL
   ansible.builtin.apt:
     name:
@@ -42,7 +43,7 @@
     group: "{{ item.group }}"
     mode: "{{ item.mode }}"
   loop:
-    - { path: /srv/shares/public, group: linux, mode: "2775" }
+    - { path: /srv/shares/public, group: admins, mode: "2775" }
     - { path: /srv/shares/secure, group: admins, mode: "0771" }
     - { path: /srv/shares/secure/linuxuser, group: admins, mode: "0770" }
     - { path: /srv/shares/secure/windowsuser, group: windows, mode: "0770" }
@@ -95,22 +96,24 @@
 - name: Set ACL on public share
   ansible.posix.acl:
     path: /srv/shares/public
-    entity: "{{ item }}"
+    entity: "{{ item.entity }}"
     etype: group
-    permissions: rwx
+    permissions: "{{ item.perms }}"
     state: present
   loop:
-    - linux
-    - windows
+    - { entity: admins, perms: rwx }
+    - { entity: linux, perms: r-x }
+    - { entity: windows, perms: r-x }
 
 - name: Set default ACL on public share
   ansible.posix.acl:
     path: /srv/shares/public
-    entity: "{{ item }}"
+    entity: "{{ item.entity }}"
     etype: group
-    permissions: rwx
+    permissions: "{{ item.perms }}"
     default: true
     state: present
   loop:
-    - linux
-    - windows
+    - { entity: admins, perms: rwx }
+    - { entity: linux, perms: r-x }
+    - { entity: windows, perms: r-x }
