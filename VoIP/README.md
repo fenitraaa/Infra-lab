@@ -38,3 +38,15 @@ Continue the configuration with these commands:
 sudo make samples
 sudo make config
 ```
+
+Right now, you can start your `Asterisk` service:
+```bash
+sudo systemctl start asterisk
+```
+![service-asterisk](screenshot/systemctl-status-asterisk.png)
+
+If you want to interact with `asterisk*CLI`, just execute this command and use all the commands inside the screenshot for verification:
+```bash
+sudo asterisk -rvvv
+```
+![asterisk-cli](screenshot/asterisk-cli.png)
