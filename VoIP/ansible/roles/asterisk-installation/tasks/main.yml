@@ -1,0 +1,94 @@
+---
+- name: Install dependencies for build
+  ansible.builtin.apt:
+    name:
+      - build-essential
+      - git
+      - wget
+      - subversion
+      - libxml2-dev
+      - libncurses5-dev
+      - uuid-dev
+      - libjansson-dev
+      - libssl-dev
+      - libsqlite3-dev
+      - pkg-config
+    update_cache: true
+    state: present
+  become: true
+
+- name: Download Asterisk source code inside /usr/bin
+  ansible.builtin.get_url:
+    url: "https://downloads.asterisk.org/pub/telephony/asterisk/asterisk-{{ asterisk_version }}.tar.gz"
+    dest: "/usr/bin/asterisk-{{ asterisk_version }}.tar.gz"
+    mode: "0644"
+  become: true
+
+- name: Extract Asterisk's archive
+  ansible.builtin.unarchive:
+    src: "/usr/bin/asterisk-{{ asterisk_version }}.tar.gz"
+    dest: "/usr/bin"
+    remote_src: true
+  become: true
+
+- name: Find the extracted directory
+  ansible.builtin.find:
+    paths: "/usr/bin"
+    patterns: "asterisk-22*"
+    file_type: directory
+  register: asterisk_extracted_dirs
+
+- name: Define source path
+  ansible.builtin.set_fact:
+    asterisk_source_path: "{{ (asterisk_extracted_dirs.files | sort(attribute='mtime') | last).path }}"
+
+- name: Script for prereq install execution
+  ansible.builtin.command: ./contrib/scripts/install_prereq install
+  args:
+    chdir: "{{ asterisk_source_path }}"
+    creates: "{{ asterisk_source_path }}/.prereq_installed"
+  become: true
+
+- name: Mark all prereq installed
+  ansible.builtin.file:
+    path: "{{ asterisk_source_path }}/.prereq_installed"
+    state: touch
+    mode: "0644"
+  become: true
+
+- name: Configuration for build
+  ansible.builtin.command: "./configure --with-jansson-bundled --with-pjproject-bundled"
+  args:
+    chdir: "{{ asterisk_source_path }}"
+    creates: "{{ asterisk_source_path }}/makeopts"
+  become: true
+
+- name: Change owner for user who does the build
+  ansible.builtin.file:
+    path: "{{ asterisk_source_path }}"
+    owner: "{{ asterisk_build_user }}"
+    group: "{{ asterisk_build_user }}"
+    recurse: true
+  become: true
+
+- name: Create the service accounts for Asterisk
+  ansible.builtin.user:
+    name: asterisk
+    system: true
+    shell: /usr/sbin/nologin
+    home: /var/lib/asterisk
+    create_home: false
+  become: true
+
+- name: Change owner of Asterisk directories for asterisk service account
+  ansible.builtin.file:
+    path: "{{ item }}"
+    owner: asterisk
+    group: asterisk
+    recurse: true
+  loop:
+    - /var/lib/asterisk
+    - /var/log/asterisk
+    - /var/spool/asterisk
+    - /etc/asterisk
+  become: true

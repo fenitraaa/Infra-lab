@@ -1,0 +1,8 @@
+---
+- name: Install and Config Asterisk
+  hosts: asterisk-lab
+  become: true
+  tags: asterisk-installation
+  gather_facts: false
+  roles:
+    - role: asterisk-installation
