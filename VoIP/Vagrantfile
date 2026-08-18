@@ -10,7 +10,22 @@ Vagrant.configure("2") do |config|
       vmware.linked_clone = false
     end
     asterisk.vm.provision "shell", inline: <<-SHELL
-      apt-get update -y
+      apt update -y
+    SHELL
+  end
+  config.vm.define "vpn-gateway" do |vpn|
+    vpn.vm.hostname = "vpn-gateway.local"
+    vpn.vm.network "private_network", ip: "192.168.10.40"
+    vpn.vm.network "forwarded_port", guest: 51820, host: 51821, protocol: "udp"
+    vpn.vm.provider "vmware_desktop" do |vmware|
+      vmware.gui = ENV['VAGRANT_GUI'] == 'true'
+      vmware.memory = 512
+      vmware.cpus = 1
+      vmware.linked_clone = false
+    end
+    vpn.vm.provision "shell", inline: <<-SHELL
+     apt update
+     apt install -y wireguard
     SHELL
   end
 end
