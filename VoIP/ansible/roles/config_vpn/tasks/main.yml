@@ -1,0 +1,61 @@
+---
+- name: Install wireguard and iptables
+  ansible.builtin.apt:
+    name:
+      - wireguard
+      - iptables
+    update_cache: true
+    state: present
+  become: true
+
+- name: Activate the IP forwarding to be permanent
+  ansible.builtin.copy:
+    dest: /etc/sysctl.d/99-wg-forward.conf
+    content: "net.ipv4.ip_forward=1\n"
+    mode: "0644"
+  become: true
+  notify: restart wireguard
+
+- name: Apply systcl
+  ansible.builtin.command: sysctl --system
+  become: true
+  changed_when: false
+
+- name: Create /etc/wireguard directory
+  ansible.builtin.file:
+    path: /etc/wireguard
+    state: directory
+    mode: "0700"
+  become: true
+
+- name: Generate keys for the server
+  ansible.builtin.shell: |
+    wg genkey | tee /etc/wireguard/privatekey | wg pubkey > /etc/wireguard/publickey
+  args:
+    creates: "/etc/wireguard/privatekey"
+  become: true
+
+- name: Change permission mode for private key
+  ansible.builtin.file:
+    path: "/etc/wireguard/privatekey"
+    mode: "0600"
+  become: true
+
+- name: Load the private key
+  ansible.builtin.slurp:
+    src: "/etc/wireguard/privatekey"
+  register: server_privkey_raw
+  become: true
+
+- name: Expose the private key as a variables
+  ansible.builtin.set_fact:
+    server_private_key: "{{ server_privkey_raw.content | b64decode | trim }}"
+
+- name: Deploy the config file wg0.conf
+  ansible.builtin.template:
+    src: wg0.conf.j2
+    dest: "/etc/wireguard/wg0.conf"
+    mode: "0600"
+  become: true
+  notify: restart wireguard
+

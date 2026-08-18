@@ -6,3 +6,11 @@
   gather_facts: false
   roles:
     - role: asterisk-installation
+
+- name: Configuration of the wireguard server
+  hosts: vpn-gateway-lab
+  become: true
+  tags: wg-config
+  gather_facts: false
+  roles:
+    - role: config_vpn
