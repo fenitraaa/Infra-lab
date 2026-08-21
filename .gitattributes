@@ -4,3 +4,5 @@
 *.drawio text eol=lf
 *.jpeg binary
 *.svg binary
+*.wav binary
+
