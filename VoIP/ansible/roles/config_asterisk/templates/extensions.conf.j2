@@ -1,0 +1,48 @@
+[internal]
+exten => _035XXXXXXX,1,Dial(PJSIP/${EXTEN},20)
+ same => n,Answer()
+ same => n,Hangup()
+
+exten => 500,1,Answer()
+ same => n,ConfBridge(salle-principale)
+ same => n,Hangup()
+
+exten => 400,1,Answer()
+ same => n,Background(fr/ivr-menu-principal)
+ same => n,WaitExten(10)
+ same => n,Hangup()
+
+exten => 1,1,Goto(ivr-commercial,401,1)
+exten => 2,1,Goto(ivr-support,402,1)
+exten => 3,1,Goto(ivr-comptabilite,403,1)
+exten => 4,1,Goto(ivr-default,404,1)
+exten => i,1,Playback(invalid)
+ same => n,Goto(internal,400,1)
+exten => t,1,Playback(timeout)
+ same => n,Goto(internal,400,1)
+
+[ivr-commercial]
+exten => 401,1,Answer()
+ same => n,Playback(fr/ivr-commercial)
+ same => n,Wait(60)
+ same => n,Hangup()
+
+[ivr-support]
+exten => 402,1,Answer()
+ same => n,Background(fr/ivr-support)
+ same => n,Wait(60)
+ same => n,Hangup()
+
+[ivr-comptabilite]
+exten => 403,1,Answer()
+ same => n,Background(fr/ivr-comptabilite)
+ same => n,Wait(60)
+ same => n,Hangup()
+
+[ivr-default]
+exten => 404,1,Answer()
+ same => n,Background(fr/ivr-default)
+ same => n,Wait(60)
+ same => n,Hangup()
+exten => 9,1,Goto(internal,400,1)
+
