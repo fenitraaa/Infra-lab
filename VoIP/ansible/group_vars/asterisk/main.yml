@@ -2,3 +2,5 @@
 asterisk_version: "22-current"
 asterisk_build_user: "vagrant"
 asterisk_make_jobs: "{{ ansible_processor_vcpus | default(2) }}"
+speech_src: "../../../speech"
+

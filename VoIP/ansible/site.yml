@@ -14,3 +14,12 @@
   gather_facts: false
   roles:
     - role: config_vpn
+
+- name: Asterisk extensions and pjsip configuration
+  hosts: asterisk-lab
+  become: true
+  tags: asterisk-config
+  gather_facts: false
+  roles:
+    - role: config_asterisk
+

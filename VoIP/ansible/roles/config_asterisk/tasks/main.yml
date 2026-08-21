@@ -1,0 +1,40 @@
+---
+- name: Save standard config in .bak file
+  ansible.builtin.copy:
+    dest: "/etc/asterisk/{{ item }}.bak"
+    src: "/etc/asterisk/{{ item }}"
+    mode: "0644"
+    remote_src: true
+  become: true
+  loop:
+    - extensions.conf
+    - pjsip.conf
+
+- name: Copy the personalized config for extensions and pjsip
+  ansible.builtin.template:
+    dest: "/etc/asterisk/{{ item }}"
+    src: "{{ item }}.j2"
+    owner: asterisk
+    group: asterisk
+    mode: "0644"
+  loop:
+    - extensions.conf
+    - pjsip.conf
+  notify: Reload module
+
+- name: Create French sounds directory
+  ansible.builtin.file:
+    path: /var/lib/asterisk/sounds/fr
+    state: directory
+    owner: asterisk
+    group: asterisk
+    mode: '0755'
+
+- name: Copy all speech to the asterisk server
+  ansible.builtin.copy:
+    dest: /var/lib/asterisk/sounds/fr/
+    src: "{{ speech_src }}"
+    owner: asterisk
+    group: asterisk
+    mode: "0644"
+

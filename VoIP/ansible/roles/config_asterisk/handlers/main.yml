@@ -1,0 +1,9 @@
+---
+- name: Reload module
+  ansible.builtin.command: asterisk -rx "{{ item }} reload"
+  become: true
+  changed_when: false
+  loop:
+    - pjsip
+    - dialplan
+
