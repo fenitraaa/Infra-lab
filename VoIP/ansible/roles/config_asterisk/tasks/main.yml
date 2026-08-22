@@ -5,6 +5,7 @@
     src: "/etc/asterisk/{{ item }}"
     mode: "0644"
     remote_src: true
+    force: false
   become: true
   loop:
     - extensions.conf
