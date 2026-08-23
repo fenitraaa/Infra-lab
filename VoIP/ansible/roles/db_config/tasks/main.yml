@@ -1,0 +1,82 @@
+---
+- name: Install postgresql
+  ansible.builtin.apt:
+    name:
+      - postgresql
+      - postgresql-contrib
+      - python3-psycopg2
+    state: present
+    update_cache: true
+
+- name: Create a2billing user
+  community.postgresql.postgresql_user:
+    name: "{{ a2billing_dbuser }}"
+    password: "{{ a2billing_pwd }}"
+    login_user: postgres
+  become: true
+  become_user: postgres
+
+- name: Create the database
+  community.postgresql.postgresql_db:
+    name: a2billing
+    owner: "{{ a2billing_dbuser }}"
+    login_user: postgres
+  become: true
+  become_user: postgres
+
+- name: Alter public schema to the a2billing user
+  community.postgresql.postgresql_schema:
+    db: a2billing
+    name: public
+    login_user: postgres
+    owner: "{{ a2billing_dbuser }}"
+  become: true
+  become_user: postgres
+
+- name: Grant privilege on database to the a2billing user
+  community.postgresql.postgresql_privs:
+    db: a2billing
+    privs: ALL
+    type: database
+    obj: a2billing
+    role: "{{ a2billing_dbuser }}"
+    login_user: postgres
+  become: true
+  become_user: postgres
+
+- name: Grant privilege on tables to the a2billing user
+  community.postgresql.postgresql_privs:
+    db: a2billing
+    privs: ALL
+    type: table
+    obj: ALL_IN_SCHEMA
+    schema: public
+    role: "{{ a2billing_dbuser }}"
+    login_user: postgres
+  become: true
+  become_user: postgres
+
+- name: Grant privilege on sequences to the a2billing user
+  community.postgresql.postgresql_privs:
+    db: a2billing
+    privs: ALL
+    type: sequence
+    obj: ALL_IN_SCHEMA
+    schema: public
+    role: "{{ a2billing_dbuser }}"
+    login_user: postgres
+  become: true
+  become_user: postgres
+
+- name: Grant privilege on functions to the a2billing user
+  community.postgresql.postgresql_privs:
+    db: a2billing
+    privs: ALL
+    type: function
+    obj: ALL_IN_SCHEMA
+    schema: public
+    role: "{{ a2billing_dbuser }}"
+    login_user: postgres
+  become: true
+  become_user: postgres
+

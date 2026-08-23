@@ -23,3 +23,11 @@
   roles:
     - role: config_asterisk
 
+- name: Database configuration
+  hosts: db-lab
+  become: true
+  tags: db-config
+  gather_facts: false
+  roles:
+    - role: db_config
+

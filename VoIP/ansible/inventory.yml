@@ -1,3 +1,4 @@
+---
 all:
   vars:
     ansible_become: true
@@ -16,3 +17,14 @@ all:
         vpn-gateway-lab:
           ansible_host: 192.168.10.40
           ansible_ssh_private_key_file: ../.vagrant/machines/vpn-gateway/vmware_desktop/private_key
+    a2billing:
+      hosts:
+        a2billing-lab:
+          ansible_host: 192.168.10.20
+          ansible_ssh_private_key_file: ../.vagrant/machines/a2billing/vmware_desktop/private_key
+    db:
+      hosts:
+        db-lab:
+          ansible_host: 192.168.10.30
+          ansible_ssh_private_key_file: ../.vagrant/machines/db/vmware_desktop/private_key
+
