@@ -39,3 +39,12 @@
     group: asterisk
     mode: "0644"
 
+- name: Configure WireGuard route
+  ansible.builtin.blockinfile:
+    path: /etc/network/interfaces
+    marker: "# {mark} WG ROUTE"
+    insertafter: "^iface eth1 inet static$"
+    block: |
+      up ip route replace 10.8.0.0/24 via 192.168.10.40 dev eth1
+      down ip route del 10.8.0.0/24 via 192.168.10.40 dev eth1 || true
+
