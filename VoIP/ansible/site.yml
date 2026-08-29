@@ -2,32 +2,26 @@
 - name: Install and Config Asterisk
   hosts: asterisk-lab
   become: true
-  tags: asterisk-installation
   gather_facts: false
   roles:
-    - role: asterisk-installation
+    - role: asterisk_installation
+      tags: asterisk_installation
+    - role: config_asterisk
+      tags: config_asterisk
 
 - name: Configuration of the wireguard server
   hosts: vpn-gateway-lab
   become: true
-  tags: wg-config
   gather_facts: false
   roles:
     - role: config_vpn
-
-- name: Asterisk extensions and pjsip configuration
-  hosts: asterisk-lab
-  become: true
-  tags: asterisk-config
-  gather_facts: false
-  roles:
-    - role: config_asterisk
+      tags: config_vpn
 
 - name: Database configuration
   hosts: db-lab
   become: true
-  tags: db-config
   gather_facts: false
   roles:
     - role: db_config
+      tags: db_config
 
