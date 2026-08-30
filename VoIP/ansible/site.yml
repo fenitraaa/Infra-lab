@@ -25,3 +25,11 @@
     - role: db_config
       tags: db_config
 
+- name: A2billing configuration
+  hosts: a2billing-lab
+  become: true
+  gather_facts: false
+  roles:
+    - role: a2b_config
+      tags: a2b_config
+

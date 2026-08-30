@@ -1,0 +1,99 @@
+---
+- name: Install all dependencies
+  ansible.builtin.apt:
+    name:
+      - php7.4
+      - php7.4-cli
+      - libapache2-mod-php7.4
+      - php7.4-curl
+      - php7.4-gd
+      - php7.4-mbstring
+      - php7.4-xml
+      - php7.4-zip
+      - php7.4-bcmath
+      - php7.4-pgsql
+      - apache2
+      - unzip
+      - curl
+      - ca-certificates
+      - lsb-release
+      - wget
+      - gnupg2
+    state: present
+    update_cache: true
+
+- name: Create a2billing directory
+  ansible.builtin.file:
+    path: /var/www/a2billing
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: "0755"
+    recurse: true
+
+- name: Check if a2billing is already exist
+  ansible.builtin.stat:
+    path: /usr/local/src/a2billing/.git
+  register: a2billing
+  become: true
+
+- name: Install and configure A2Billing
+  when: not a2billing.stat.exists
+  block:
+    - name: Clone a2billing project
+      ansible.builtin.git:
+        repo: https://github.com/Star2Billing/a2billing.git
+        dest: /usr/local/src
+        clone: true
+        version: v2.2.0
+        depth: 1
+      become: true
+
+    - name: Change owner of a2billing directory to vagrant
+      ansible.builtin.file:
+        path: /usr/local/src/a2billing
+        owner: vagrant
+        group: vagrant
+        recurse: true
+      become: true
+
+    - name: Copy a2billing source to the apache path
+      ansible.builtin.file:
+        src: /usr/local/src/a2billing/
+        dest: /var/www/a2billing/
+      become: true
+
+    - name: Download php composer
+      ansible.builtin.uri:
+        url: https://getcomposer.org/installer
+        dest: /tmp/composer-setup.php
+        mode: "0644"
+
+    - name: Install the composer
+      ansible.builtin.command:
+        cmd: php composer-setup.php --2.2 --install-dir=/usr/local/bin --filename=composer
+        creates: /usr/local/bin/composer
+      become: true
+
+    - name: Add a2billing configuration to the available site
+      ansible.builtin.copy:
+        src: a2billing.conf
+        dest: /etc/apache2/sites-available/
+        mode: "0644"
+      become: true
+      notify: Enable a2billing site
+
+- name: Load lines from file
+  ansible.builtin.set_fact:
+    database_config: "{{ lookup('ansible.builtin.template', 'a2billing.conf.j2') }}"
+
+- name: Add all DB creds to a2billing.conf
+  ansible.builtin.replace:
+    path: /etc/a2billing.conf
+    regexp: '(?ms)^\[database\].*?(?=^\[|\Z)'
+    replace: "{{ database_config }}"
+
+- name: Reload apache2
+  ansible.builtin.service:
+    name: apache2
+    state: reloaded

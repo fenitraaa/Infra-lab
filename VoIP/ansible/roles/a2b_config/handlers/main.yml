@@ -1,0 +1,6 @@
+---
+- name: Enable a2billing site
+  ansible.builtin.command:
+    cmd: a2ensite a2billing.conf && a2enmod rewrite
+  become: true
+
