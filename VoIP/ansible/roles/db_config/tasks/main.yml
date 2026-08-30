@@ -24,6 +24,18 @@
   become: true
   become_user: postgres
 
+- name: Copy sql file to tmp directory
+  ansible.builtin.copy:
+    src: a2billing.sql
+    dest: /tmp/
+  changed_when: false
+
+- name: Import a2billing database
+  ansible.builtin.command:
+    cmd: psql --username=postgres --dbname=a2billing --file=/tmp/a2billing.sql
+  become: true
+  become_user: postgres
+
 - name: Alter public schema to the a2billing user
   community.postgresql.postgresql_schema:
     db: a2billing
@@ -79,4 +91,18 @@
     login_user: postgres
   become: true
   become_user: postgres
+
+- name: Allow connection from the private network
+  ansible.builtin.lineinfile:
+    path: /etc/postgresql/15/main/pg_hba.conf
+    line: 'host    a2billing    a2billing_dbuser    192.168.10.0/24    scram-sha-256'
+  become: true
+  notify: Restart postgres
+
+- name: Allow all addresses to listen on
+  ansible.builtin.lineinfile:
+    path: /etc/postgresql/15/main/postgresql.conf
+    line: "listen_addresses = '*'"
+  become: true
+  notify: Restart postgres
 
