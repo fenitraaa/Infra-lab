@@ -5,4 +5,4 @@
 *.jpeg binary
 *.svg binary
 *.wav binary
-
+*.sql linguist-detectable=false
