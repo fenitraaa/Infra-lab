@@ -1,104 +1,104 @@
-# Cluster Proxmox Haute Disponibilité (lab-HA) — Hébergement de l'application AI Weather
+# High Availability Proxmox Cluster
 
-## 1. Présentation
+## 1. Overview
 
-Ce projet met en place, dans un environnement de laboratoire virtualisé (VirtualBox), une infrastructure Proxmox VE 9.2 en haute disponibilité (HA). Elle héberge une application web conteneurisée.
+This project sets up a Proxmox VE 9.2 high availability (HA) infrastructure in a virtualized lab environment (VirtualBox). It hosts a containerized web application.
 
 ## 2. Architecture
 
-![Architecture](<proxmox-HA.svg>)
+![Architecture](<proxmox-HA.png>)
 
-## 3. Étapes de réalisation
+## 3. Implementation steps
 
-### 3.1 Installation de Proxmox VE
+### 3.1 Installing Proxmox VE
 
-Démarrage de l'ISO Proxmox VE 9.2 dans une machine virtuelle VirtualBox.
+Booting the Proxmox VE 9.2 ISO in a VirtualBox virtual machine.
 
-![Menu de démarrage de l'installeur Proxmox](<screenshot/Screenshot 2026-10-03 101055.png>)
+![Proxmox installer boot menu](<screenshot/Screenshot 2026-10-03 101055.png>)
 
-Lancement de l'installation (création des partitions) sur la VM `proxmox-lab`.
+Starting the installation (partition creation) on the `proxmox-lab` VM.
 
-![Installeur Proxmox VE en cours](<screenshot/Screenshot 2026-10-04 000030.png>)
+![Proxmox VE installer in progress](<screenshot/Screenshot 2026-10-04 000030.png>)
 
-Après installation, la console indique l'URL d'administration (`https://10.0.2.15:8006/`).
+After installation, the console shows the administration URL (`https://10.0.2.15:8006/`).
 
-![Console Proxmox après installation](<screenshot/Screenshot 2026-10-04 113510.png>)
+![Proxmox console after installation](<screenshot/Screenshot 2026-10-04 113510.png>)
 
-L'interface web est accessible depuis la machine hôte via `https://localhost:8006` (redirection de port VirtualBox), avec connexion `root` (Linux PAM).
+The web interface is reachable from the host machine via `https://localhost:8006` (VirtualBox port forwarding), logging in as `root` (Linux PAM).
 
-![Page de connexion Proxmox VE](<screenshot/Screenshot 2026-10-04 113559.png>)
+![Proxmox VE login page](<screenshot/Screenshot 2026-10-04 113559.png>)
 
-### 3.2 Premier conteneur LXC (`node-1`) et Docker
+### 3.2 First LXC container (`node-1`) and Docker
 
-Un conteneur LXC Ubuntu 24.04 LTS (`101 – node-1`) est créé sur le nœud `pve`.
+An Ubuntu 24.04 LTS LXC container (`101 – node-1`) is created on the `pve` node.
 
-![Console du conteneur 101 node-1](<screenshot/Screenshot 2026-10-11 094626.png>)
+![Console of container 101 node-1](<screenshot/Screenshot 2026-10-11 094626.png>)
 
-Docker (`docker-ce`, `containerd`, plugins `buildx` et `compose`) y est installé.
+Docker (`docker-ce`, `containerd`, `buildx` and `compose` plugins) is installed in it.
 
-![Installation de Docker dans node-1](<screenshot/Screenshot 2026-10-11 102510.png>)
+![Docker installation in node-1](<screenshot/Screenshot 2026-10-11 102510.png>)
 
-L'assistant de création de conteneur LXC (conteneur non privilégié, option Nesting activée, indispensable pour faire tourner Docker dans un LXC) :
+The LXC container creation wizard (unprivileged container, Nesting option enabled, which is required to run Docker inside an LXC):
 
-![Assistant de création d'un conteneur LXC](<screenshot/Screenshot 2026-10-11 171021.png>)
+![LXC container creation wizard](<screenshot/Screenshot 2026-10-11 171021.png>)
 
-### 3.3 Les trois machines virtuelles du cluster
+### 3.3 The three virtual machines of the cluster
 
-Trois VMs Proxmox (`pve1`, `pve2`, `pve3`) tournent dans VirtualBox.
+Three Proxmox VMs (`pve1`, `pve2`, `pve3`) run in VirtualBox.
 
-![Gestionnaire VirtualBox avec pve1, pve2, pve3](<screenshot/Screenshot 2026-10-11 170722.png>)
+![VirtualBox manager with pve1, pve2, pve3](<screenshot/Screenshot 2026-10-11 170722.png>)
 
-### 3.4 Création du cluster et du QDevice
+### 3.4 Creating the cluster and the QDevice
 
-Le cluster `lab-HA` est formé : `pve2` rejoint `pve1` (192.168.100.10) via l'assistant Cluster Join (jointure assistée, empreinte vérifiée).
+The `lab-HA` cluster is formed: `pve2` joins `pve1` (192.168.100.10) through the Cluster Join wizard (assisted join, fingerprint verified).
 
-![Cluster Join sur pve2](<screenshot/Screenshot 2026-10-11 150642.png>)
+![Cluster Join on pve2](<screenshot/Screenshot 2026-10-11 150642.png>)
 
-Un cluster à 2 nœuds ne peut pas maintenir le quorum si l'un tombe. On ajoute donc un vote externe (QDevice) sur `pve3` :
+A 2-node cluster cannot keep quorum if one node goes down. So we add an external vote (QDevice) on `pve3`:
 
-- Installation de `corosync-qnetd` sur `pve3` :
+- Installing `corosync-qnetd` on `pve3`:
 
-![Installation de corosync-qnetd sur pve3](<screenshot/Screenshot 2026-10-11 150207.png>)
+![Installing corosync-qnetd on pve3](<screenshot/Screenshot 2026-10-11 150207.png>)
 
-- Installation de `corosync-qdevice` sur `pve1` et `pve2` :
+- Installing `corosync-qdevice` on `pve1` and `pve2`:
 
-![Installation de corosync-qdevice sur pve1](<screenshot/Screenshot 2026-10-11 150223.png>)
+![Installing corosync-qdevice on pve1](<screenshot/Screenshot 2026-10-11 150223.png>)
 
-![Installation de corosync-qdevice sur pve2](<screenshot/Screenshot 2026-10-11 150457.png>)
+![Installing corosync-qdevice on pve2](<screenshot/Screenshot 2026-10-11 150457.png>)
 
-- Autorisation de la connexion SSH `root` sur `pve3` (nécessaire à la configuration du QDevice) :
+- Allowing `root` SSH login on `pve3` (required to configure the QDevice):
 
-![Configuration sshd sur pve3](<screenshot/Screenshot 2026-10-11 150353.png>)
+![sshd configuration on pve3](<screenshot/Screenshot 2026-10-11 150353.png>)
 
-- Vérification du service `corosync-qnetd` (actif) :
+- Checking the `corosync-qnetd` service (active):
 
-![Statut de corosync-qnetd](<screenshot/Screenshot 2026-10-11 150417.png>)
+![corosync-qnetd status](<screenshot/Screenshot 2026-10-11 150417.png>)
 
-- Configuration depuis `pve1` avec `pvecm qdevice setup 192.168.100.12` :
+- Configuring from `pve1` with `pvecm qdevice setup 192.168.100.12`:
 
 ![pvecm qdevice setup](<screenshot/Screenshot 2026-10-11 150803.png>)
 
-Résultat : 3 votes attendus, quorum = 2, flag `Quorate Qdevice`. Le cluster survit à la perte d'un nœud.
+Result: 3 expected votes, quorum = 2, `Quorate Qdevice` flag. The cluster survives the loss of one node.
 
-![Quorum avec QDevice](<screenshot/Screenshot 2026-10-11 150849.png>)
+![Quorum with QDevice](<screenshot/Screenshot 2026-10-11 150849.png>)
 
-### 3.5 Déploiement de l'application AI Weather
+### 3.5 Deploying the AI Weather application
 
-Dans `node-1`, le front-end est lancé avec Docker, exposé sur le port 8080 et avec `--restart always` :
+In `node-1`, the front end is started with Docker, exposed on port 8080 and with `--restart always`:
 
 ```bash
 docker run -d --name aiweather --restart always -p 8080:80 ghcr.io/fenitraaa/aiweather-front:latest
 ```
 
-![Lancement du conteneur aiweather](<screenshot/Screenshot 2026-10-11 155630.png>)
+![Starting the aiweather container](<screenshot/Screenshot 2026-10-11 155630.png>)
 
-L'application affiche la météo du jour (température, précipitations, vent), des prévisions sur 7 jours, un historique et un graphique de prédiction. Elle est accessible sur `aiweather.test:8080`.
+The application shows today's weather (temperature, precipitation, wind), a 7-day forecast, a history and a prediction chart. It is accessible at `aiweather.test:8080`.
 
-![Application AI Weather](<screenshot/Screenshot 2026-10-11 171549.png>)
+![AI Weather application](<screenshot/Screenshot 2026-10-11 171549.png>)
 
-### 3.6 Accès réseau : NAT et load balancer
+### 3.6 Network access: NAT and load balancer
 
-Sur `pve1` et `pve2`, le routage IP est activé et le trafic arrivant sur le port 8080 est redirigé (DNAT) vers le conteneur `10.0.2.50:8080`, avec MASQUERADE. Ainsi, quel que soit le nœud qui héberge le conteneur, le service reste joignable sur l'IP du nœud.
+On `pve1` and `pve2`, IP forwarding is enabled and traffic arriving on port 8080 is redirected (DNAT) to the container `10.0.2.50:8080`, with MASQUERADE. This way, whichever node hosts the container, the service stays reachable on the node's IP.
 
 ```bash
 sysctl -w net.ipv4.ip_forward=1
@@ -107,61 +107,60 @@ iptables -t nat -A PREROUTING -i enp0s8 -p tcp --dport 8080 -j DNAT --to-destina
 iptables -t nat -A POSTROUTING -d 10.0.2.50 -p tcp --dport 8080 -j MASQUERADE
 ```
 
-![NAT sur pve1](<screenshot/Screenshot 2026-10-11 160943.png>)
+![NAT on pve1](<screenshot/Screenshot 2026-10-11 160943.png>)
 
-![NAT sur pve2](<screenshot/Screenshot 2026-10-11 160815.png>)
+![NAT on pve2](<screenshot/Screenshot 2026-10-11 160815.png>)
 
-Test depuis `pve3` : le service répond `HTTP/1.1 200 OK` (serveur Nginx) sur `192.168.100.10:8080`.
+Test from `pve3`: the service answers `HTTP/1.1 200 OK` (Nginx server) on `192.168.100.10:8080`.
 
-![Test curl depuis pve3](<screenshot/Screenshot 2026-10-11 161640.png>)
+![curl test from pve3](<screenshot/Screenshot 2026-10-11 161640.png>)
 
-HAProxy est installé sur `pve3` pour servir de point d'entrée unique et répartir/rediriger le trafic vers le nœud actif.
+HAProxy is installed on `pve3` to act as a single entry point and distribute/redirect traffic to the active node.
 
-![Installation de HAProxy](<screenshot/Screenshot 2026-10-11 161707.png>)
+![HAProxy installation](<screenshot/Screenshot 2026-10-11 161707.png>)
 
-![Service HAProxy actif](<screenshot/Screenshot 2026-10-11 161730.png>)
+![HAProxy service active](<screenshot/Screenshot 2026-10-11 161730.png>)
 
-### 3.7 Mise en haute disponibilité du conteneur
+### 3.7 Making the container highly available
 
-Le conteneur CT 101 est ajouté comme ressource HA (état demandé `started`, 1 redémarrage max, 1 relocalisation max, failback et auto-rebalance activés). Proxmox rappelle qu'au moins trois votes de quorum sont recommandés, d'où l'intérêt du QDevice.
+CT 101 is added as an HA resource (requested state `started`, 1 restart max, 1 relocation max, failback and auto-rebalance enabled). Proxmox reminds that at least three quorum votes are recommended, hence the value of the QDevice.
 
-![Ajout du CT 101 aux ressources HA](<screenshot/Screenshot 2026-10-11 153101.png>)
+![Adding CT 101 to HA resources](<screenshot/Screenshot 2026-10-11 153101.png>)
 
-Le statut HA confirme : quorum OK, fencing armé (watchdog CRM actif), master `pve1`, `ct:101` démarré sur `pve1`.
+The HA status confirms: quorum OK, fencing armed (CRM watchdog active), master `pve1`, `ct:101` started on `pve1`.
 
-![Statut HA du datacenter](<screenshot/Screenshot 2026-10-11 171631.png>)
+![Datacenter HA status](<screenshot/Screenshot 2026-10-11 171631.png>)
 
-### 3.8 Stockage ZFS et réplication
+### 3.8 ZFS storage and replication
 
-Deux disques virtuels de 20 Go sont créés dans VirtualBox pour `pve1` et `pve2`.
+Two 20 GB virtual disks are created in VirtualBox for `pve1` and `pve2`.
 
-![Création des disques VDI](<screenshot/Screenshot 2026-10-11 192123.png>)
+![Creating the VDI disks](<screenshot/Screenshot 2026-10-11 192123.png>)
 
-Sur chaque nœud, un pool ZFS `zfs-data` est créé sur `/dev/sdb` (`ashift=12`, compression `lz4`). Sur `pve2`, la taille maximale du cache ARC est limitée à 512 Mo (`zfs_arc_max=536870912`) pour économiser la mémoire de la VM.
+On each node, a ZFS pool `zfs-data` is created on `/dev/sdb` (`ashift=12`, `lz4` compression). On `pve2`, the maximum ARC cache size is limited to 512 MB (`zfs_arc_max=536870912`) to save the VM's memory.
 
-![Pool ZFS sur pve1](<screenshot/Screenshot 2026-10-11 195347.png>)
+![ZFS pool on pve1](<screenshot/Screenshot 2026-10-11 195347.png>)
 
-![Pool ZFS sur pve2](<screenshot/Screenshot 2026-10-11 195709.png>)
+![ZFS pool on pve2](<screenshot/Screenshot 2026-10-11 195709.png>)
 
-Le pool est déclaré comme stockage Proxmox sur les deux nœuds (contenu `rootdir,images`) ; `pvesm status` liste `local`, `local-lvm`, `nfs-shared` et `zfs-data`.
+The pool is declared as Proxmox storage on both nodes (content `rootdir,images`); `pvesm status` lists `local`, `local-lvm`, `nfs-shared` and `zfs-data`.
 
-![Ajout du stockage zfs-data](<screenshot/Screenshot 2026-10-11 195830.png>)
+![Adding the zfs-data storage](<screenshot/Screenshot 2026-10-11 195830.png>)
 
-Une tâche de réplication du CT 101 vers `pve2` est créée, toutes les 15 minutes.
+A replication job for CT 101 to `pve2` is created, every 15 minutes.
 
-![Création du job de réplication](<screenshot/Screenshot 2026-10-11 200436.png>)
+![Creating the replication job](<screenshot/Screenshot 2026-10-11 200436.png>)
 
-`pvesr status` confirme son bon fonctionnement (état OK, 0 échec).
+`pvesr status` confirms it works correctly (state OK, 0 failures).
 
-![Statut de la réplication](<screenshot/Screenshot 2026-10-11 200545.png>)
+![Replication status](<screenshot/Screenshot 2026-10-11 200545.png>)
 
-## 4. Test de basculement (failover)
+## 4. Failover test
 
-Pour simuler une panne, la VM `pve1` est éteinte brutalement depuis VirtualBox.
+To simulate a failure, the `pve1` VM is abruptly powered off from VirtualBox.
 
-![Extinction de pve1 dans VirtualBox](<screenshot/Screenshot 2026-10-11 202815.png>)
+![Powering off pve1 in VirtualBox](<screenshot/Screenshot 2026-10-11 202815.png>)
 
-Résultat observé sur `pve2` : `pve1` est détecté comme mort, `pve2` devient master HA, et le service `ct:101` est redémarré automatiquement sur `pve2`. Le quorum reste OK grâce au QDevice.
+Result observed on `pve2`: `pve1` is detected as dead, `pve2` becomes HA master, and the `ct:101` service is automatically restarted on `pve2`. Quorum stays OK thanks to the QDevice.
 
-![Failover : ct:101 redémarré sur pve2](<screenshot/Screenshot 2026-10-11 203346.png>)
-
+![Failover: ct:101 restarted on pve2](<screenshot/Screenshot 2026-10-11 203346.png>)
